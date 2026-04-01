@@ -2,9 +2,9 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const services = [
-  { title: "About Me", path: "/about", subtitle: "Background & interests" },
-  { title: "Academic Work", path: "/academic-work", subtitle: "Research & publications" },
-  { title: "Educational Apps", path: "/educational-apps", subtitle: "Digital learning tools" },
+  { title: "About Me", path: "/about", subtitle: "Researcher & educator profile" },
+  { title: "Academic Work", path: "/academic-work", subtitle: "Publications & research" },
+  { title: "Educational Apps", path: "/educational-apps", subtitle: "Six digital learning tools" },
 ];
 
 const ServiceCards = () => {

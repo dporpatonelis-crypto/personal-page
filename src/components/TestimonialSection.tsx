@@ -14,17 +14,28 @@ const TestimonialSection = () => {
         />
       </div>
       <div className="p-8 md:p-16 flex flex-col justify-center items-center text-center">
-        <span className="text-xs tracking-[0.2em] font-body text-muted-foreground mb-6">QUOTE</span>
-        <blockquote className="font-serif text-xl md:text-2xl italic font-light leading-relaxed max-w-md mb-8">
-          "Your creativity and attention to detail always exceed my expectations."
-        </blockquote>
-        <p className="font-body text-sm font-light text-muted-foreground leading-relaxed max-w-sm mb-6">
-          Working with you is truly one of the most exciting and reassuring experiences. 
-          Every time I see your work, I feel pure joy.
-        </p>
-        <p className="text-xs tracking-[0.2em] font-body text-muted-foreground">
-          — COLLEAGUE, UNIVERSITY DEPT.
-        </p>
+        <span className="text-xs tracking-[0.2em] font-body text-muted-foreground mb-6">RECENT HIGHLIGHTS</span>
+        <div className="space-y-6 max-w-md">
+          <div className="text-left">
+            <span className="text-[9px] font-body tracking-[0.2em] text-muted-foreground">THEOLOGY · FREE</span>
+            <h3 className="font-serif text-xl italic font-light mt-1">God and the Existence of Evil</h3>
+            <p className="font-body text-sm text-muted-foreground mt-1">John Chrysostom «On the Devil». 4,929 views · 309 bookmarks</p>
+          </div>
+          <div className="text-left">
+            <span className="text-[9px] font-body tracking-[0.2em] text-muted-foreground">CHRISTOLOGY · KINDLE</span>
+            <h3 className="font-serif text-xl italic font-light mt-1">God and Man in Christ</h3>
+            <p className="font-body text-sm text-muted-foreground mt-1">Cyril of Alexandria «Christ is One». 453 views · 61 bookmarks</p>
+          </div>
+          <div className="text-left">
+            <span className="text-[9px] font-body tracking-[0.2em] text-muted-foreground">PATRISTICS</span>
+            <h3 className="font-serif text-xl italic font-light mt-1">Attitude of the Great Fathers</h3>
+            <p className="font-body text-sm text-muted-foreground mt-1">Church–State relations. 4th–5th c. Patristics. 281 views.</p>
+          </div>
+        </div>
+        <a href="https://auth.academia.edu/DimitriosPorpatonelis" target="_blank" rel="noopener noreferrer"
+          className="mt-8 text-xs tracking-[0.2em] font-body hover:opacity-60 transition-opacity underline underline-offset-4">
+          VIEW ALL ON ACADEMIA.EDU →
+        </a>
       </div>
     </section>
   );
