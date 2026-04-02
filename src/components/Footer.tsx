@@ -1,4 +1,8 @@
+import { useLanguage } from "@/contexts/LanguageContext";
+
 const Footer = () => {
+  const { tr } = useLanguage();
+
   return (
     <footer className="bg-card border-t border-border py-12 px-8">
       <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
@@ -14,7 +18,7 @@ const Footer = () => {
         </div>
         <div className="h-px w-16 bg-border" />
         <p className="text-[10px] font-body text-muted-foreground tracking-[0.2em]">
-          © MMXXVI DIMITRIOS PORPATONELIS · ARISTOTLE UNIVERSITY OF THESSALONIKI
+          {tr("footer.copy")}
         </p>
       </div>
     </footer>

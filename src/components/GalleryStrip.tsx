@@ -1,20 +1,20 @@
-import gallery1 from "@/assets/gallery-1.jpg";
-import gallery2 from "@/assets/gallery-2.jpg";
-import gallery3 from "@/assets/gallery-3.jpg";
-import gallery4 from "@/assets/gallery-4.jpg";
-import heroImage1 from "@/assets/hero-1.jpg";
+import { useImageSettings } from "@/contexts/ImageSettingsContext";
+import type { ImageKey } from "@/contexts/ImageSettingsContext";
 
-const images = [gallery1, gallery2, gallery3, gallery4, heroImage1];
+const keys: ImageKey[] = ["gallery1", "gallery2", "gallery3", "gallery4", "hero1"];
 
 const GalleryStrip = () => {
+  const { getImageSrc, getOpacity } = useImageSettings();
+
   return (
     <section className="grid grid-cols-2 md:grid-cols-5">
-      {images.map((img, i) => (
+      {keys.map((key, i) => (
         <div key={i} className="relative aspect-square overflow-hidden">
           <img
-            src={img}
+            src={getImageSrc(key)}
             alt={`Gallery ${i + 1}`}
             className="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+            style={{ opacity: getOpacity(key) / 100 }}
             loading="lazy"
             width={640}
             height={640}

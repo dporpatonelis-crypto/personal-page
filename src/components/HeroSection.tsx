@@ -1,14 +1,18 @@
-import heroImage1 from "@/assets/hero-1.jpg";
-import heroImage2 from "@/assets/hero-2.jpg";
+import { useImageSettings } from "@/contexts/ImageSettingsContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const HeroSection = () => {
+  const { getImageSrc, getOpacity } = useImageSettings();
+  const { tr } = useLanguage();
+
   return (
     <section className="relative h-screen pt-16 grid grid-cols-1 md:grid-cols-2">
       <div className="relative">
         <img
-          src={heroImage1}
+          src={getImageSrc("hero1")}
           alt="Workspace"
           className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: getOpacity("hero1") / 100 }}
           width={1024}
           height={1280}
         />
@@ -19,18 +23,18 @@ const HeroSection = () => {
             <br />
             Porpatonelis
           </h1>
-          <p className="mt-6 text-sm font-body font-light text-primary-foreground/80 max-w-xs leading-relaxed">
-            Post-Doctoral Researcher · Aristotle University of Thessaloniki. 
-            Patristics, Byzantine History & Digital Pedagogy.
+          <p className="mt-6 text-sm font-body font-light text-primary-foreground/80 max-w-xs leading-relaxed whitespace-pre-line">
+            {tr("hero.subtitle")}
           </p>
         </div>
       </div>
 
       <div className="hidden md:block relative">
         <img
-          src={heroImage2}
-          alt="Dimitrios Porpatonelis"
+          src={getImageSrc("hero2")}
+          alt="Academic library"
           className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: getOpacity("hero2") / 100 }}
           width={1024}
           height={1280}
         />
