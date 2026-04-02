@@ -1,37 +1,41 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SettingsPanel from "@/components/SettingsPanel";
 import { ArrowRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const resources = [
-  { title: "Course Materials", description: "Lecture slides, reading lists, and supplementary resources for all courses.", icon: "📚" },
-  { title: "Assignments", description: "Current assignments, deadlines, and submission guidelines.", icon: "📝" },
-  { title: "Office Hours", description: "Schedule a meeting or join virtual office hours for academic support.", icon: "🕐" },
-  { title: "Discussion Forum", description: "Engage with peers and ask questions about course content.", icon: "💬" },
-  { title: "Grades & Feedback", description: "View your grades and detailed feedback on submitted work.", icon: "📊" },
-  { title: "Research Opportunities", description: "Open positions for research assistants and collaborative projects.", icon: "🔬" },
+const resourceKeys = [
+  { titleKey: "portal.r1.title", descKey: "portal.r1.desc", icon: "📚" },
+  { titleKey: "portal.r2.title", descKey: "portal.r2.desc", icon: "📝" },
+  { titleKey: "portal.r3.title", descKey: "portal.r3.desc", icon: "🕐" },
+  { titleKey: "portal.r4.title", descKey: "portal.r4.desc", icon: "💬" },
+  { titleKey: "portal.r5.title", descKey: "portal.r5.desc", icon: "📊" },
+  { titleKey: "portal.r6.title", descKey: "portal.r6.desc", icon: "🔬" },
 ];
 
 const StudentPortal = () => {
+  const { tr } = useLanguage();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="pt-16">
         <section className="p-8 md:p-16 lg:p-24 max-w-5xl mx-auto">
-          <span className="text-xs tracking-[0.2em] font-body text-muted-foreground mb-4 block">STUDENT PORTAL</span>
-          <h1 className="font-serif text-4xl md:text-5xl italic font-light mb-4">
-            Student<br />Resources
+          <span className="text-xs tracking-[0.2em] font-body text-muted-foreground mb-4 block">{tr("portal.label")}</span>
+          <h1 className="font-serif text-4xl md:text-5xl italic font-light mb-4 whitespace-pre-line">
+            {tr("portal.title")}
           </h1>
           <p className="font-body text-sm font-light text-muted-foreground max-w-lg mb-16">
-            Access all course materials, assignments, and academic resources in one place.
+            {tr("portal.desc")}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border">
-            {resources.map((resource, i) => (
+            {resourceKeys.map((r, i) => (
               <div key={i} className="bg-background p-8 group hover:bg-card transition-colors cursor-pointer">
-                <span className="text-3xl mb-4 block">{resource.icon}</span>
-                <h3 className="font-serif text-xl italic font-light mb-2">{resource.title}</h3>
+                <span className="text-3xl mb-4 block">{r.icon}</span>
+                <h3 className="font-serif text-xl italic font-light mb-2">{tr(r.titleKey)}</h3>
                 <p className="font-body text-xs font-light text-muted-foreground leading-relaxed mb-4">
-                  {resource.description}
+                  {tr(r.descKey)}
                 </p>
                 <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
               </div>
@@ -39,7 +43,7 @@ const StudentPortal = () => {
           </div>
 
           <div className="mt-16 border-t border-border pt-8">
-            <h2 className="font-serif text-2xl italic font-light mb-4">Announcements</h2>
+            <h2 className="font-serif text-2xl italic font-light mb-4">{tr("portal.announcements")}</h2>
             <div className="space-y-4">
               <div className="border-b border-border pb-4">
                 <p className="text-xs font-body text-muted-foreground tracking-wide mb-1">APRIL 1, 2026</p>
@@ -58,6 +62,7 @@ const StudentPortal = () => {
         </section>
       </div>
       <Footer />
+      <SettingsPanel />
     </div>
   );
 };

@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-
-const navItems = [
-  { label: "HOME", path: "/" },
-  { label: "ABOUT", path: "/about" },
-  { label: "ACADEMIC WORK", path: "/academic-work" },
-  { label: "EDU APPS", path: "/educational-apps" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Navbar = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { tr } = useLanguage();
+
+  const navItems = [
+    { label: tr("nav.home"), path: "/" },
+    { label: tr("nav.about"), path: "/about" },
+    { label: tr("nav.academic"), path: "/academic-work" },
+    { label: tr("nav.apps"), path: "/educational-apps" },
+  ];
 
   return (
     <>
@@ -51,7 +53,7 @@ const Navbar = () => {
               to="/student-portal"
               className="text-xs tracking-[0.2em] font-body font-light border border-foreground px-4 py-2 hover:bg-foreground hover:text-background transition-colors"
             >
-              STUDENT PORTAL
+              {tr("nav.portal")}
             </Link>
           </div>
 
@@ -65,13 +67,12 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
           <div className="absolute inset-0 bg-foreground/50" onClick={() => setMobileOpen(false)} />
           <div className="absolute top-0 left-0 h-full w-72 bg-background border-r border-border flex flex-col">
             <div className="p-6 border-b border-border flex justify-between items-center">
-              <span className="font-serif text-xl italic">Navigation</span>
+              <span className="font-serif text-xl italic">{tr("nav.navigation")}</span>
               <button onClick={() => setMobileOpen(false)}><X className="w-5 h-5" /></button>
             </div>
             <nav className="flex-1 py-8 px-6 space-y-4">
@@ -98,7 +99,7 @@ const Navbar = () => {
                     : "text-muted-foreground pl-3"
                 }`}
               >
-                STUDENT PORTAL
+                {tr("nav.portal")}
               </Link>
             </nav>
             <div className="p-6">

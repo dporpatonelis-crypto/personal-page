@@ -1,6 +1,8 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import gallery3 from "@/assets/gallery-3.jpg";
+import SettingsPanel from "@/components/SettingsPanel";
+import { useImageSettings } from "@/contexts/ImageSettingsContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const publications = [
   {
@@ -51,30 +53,34 @@ const publications = [
 ];
 
 const AcademicWork = () => {
+  const { getImageSrc, getOpacity } = useImageSettings();
+  const { tr } = useLanguage();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="pt-16">
         <section className="p-8 md:p-16 lg:p-24 max-w-5xl mx-auto">
-          <span className="text-xs tracking-[0.2em] font-body text-muted-foreground mb-4 block">ACADEMIC WORK</span>
-          <h1 className="font-serif text-4xl md:text-5xl italic font-light mb-4">
-            Academic Work &<br />Publications
+          <span className="text-xs tracking-[0.2em] font-body text-muted-foreground mb-4 block">{tr("academic.label")}</span>
+          <h1 className="font-serif text-4xl md:text-5xl italic font-light mb-4 whitespace-pre-line">
+            {tr("academic.title")}
           </h1>
           <div className="flex flex-col md:flex-row md:justify-between md:items-baseline mb-16">
             <p className="font-body text-sm font-light text-muted-foreground max-w-lg">
-              Research and publications in Patristics, Byzantine History, and Political Theology.
+              {tr("academic.desc")}
             </p>
             <a href="https://auth.academia.edu/DimitriosPorpatonelis" target="_blank" rel="noopener noreferrer"
               className="text-xs tracking-[0.2em] font-body text-muted-foreground hover:opacity-60 transition-opacity mt-2 md:mt-0">
-              VIEW ALL ON ACADEMIA.EDU →
+              {tr("highlights.viewAll")}
             </a>
           </div>
 
           <div className="relative mb-16">
             <img
-              src={gallery3}
+              src={getImageSrc("gallery3")}
               alt="Books"
               className="w-full h-64 object-cover"
+              style={{ opacity: getOpacity("gallery3") / 100 }}
               loading="lazy"
               width={640}
               height={800}
@@ -105,6 +111,7 @@ const AcademicWork = () => {
         </section>
       </div>
       <Footer />
+      <SettingsPanel />
     </div>
   );
 };
