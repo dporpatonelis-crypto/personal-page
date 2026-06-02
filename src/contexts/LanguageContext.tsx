@@ -38,6 +38,21 @@ export const t: Translations = {
   "media.read": { en: "READ", el: "ΑΝΑΓΝΩΣΗ" },
   "nav.navigation": { en: "Navigation", el: "Πλοήγηση" },
 
+  // Media – Puzzles section
+  "media.section.lessons": { en: "Lessons Library", el: "Βιβλιοθήκη Μαθημάτων" },
+  "media.section.puzzles": { en: "Puzzles Library", el: "Βιβλιοθήκη Puzzle" },
+  "media.puzzles.desc": {
+    en: "Import a JSON scenario exported from the GLB Matcher puzzle. Build a growing library of interactive matching puzzles — history, theology, interreligious themes — and launch each one in place.",
+    el: "Εισαγάγετε JSON σενάριο από το GLB Matcher puzzle. Χτίστε σταδιακά μια βιβλιοθήκη διαδραστικών puzzle αντιστοίχισης — ιστορικά, θεολογικά, διαθρησκειακά — και ανοίξτε το καθένα επιτόπου.",
+  },
+  "media.puzzles.drop": { en: "Drop puzzle JSON here", el: "Αφήστε JSON puzzle εδώ" },
+  "media.puzzles.empty": { en: "No puzzles yet", el: "Καμία puzzle ακόμη" },
+  "media.puzzles.emptyHint": { en: "Import a scenario JSON to begin your puzzle library", el: "Εισαγάγετε JSON σεναρίου για να ξεκινήσετε" },
+  "media.puzzles.play": { en: "PLAY", el: "ΕΚΚΙΝΗΣΗ" },
+  "media.puzzles.pairs": { en: "pairs", el: "ζεύγη" },
+  "media.puzzles.count": { en: "puzzles", el: "puzzle" },
+  "media.puzzles.default": { en: "Built-in: Ancient Agora of Athens", el: "Ενσωματωμένο: Αρχαία Αγορά Αθηνών" },
+
   // Hero
   "hero.subtitle": {
     en: "Post-Doctoral Researcher · Aristotle University of Thessaloniki.\nPatristics, Byzantine History & Digital Pedagogy.",
