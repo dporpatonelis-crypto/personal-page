@@ -955,13 +955,36 @@ function initDemo() {
   arts.forEach((a, i)  => Object.assign(state.artifacts[i],  a));
 }
 
-initDemo();
+// ── Embedded mode: accept scenario via URL hash or postMessage ──
+function tryLoadEmbeddedScenario() {
+  try {
+    if (location.hash && location.hash.length > 1) {
+      const raw = decodeURIComponent(location.hash.slice(1));
+      const data = JSON.parse(raw);
+      loadFromJSON(data);
+      return true;
+    }
+  } catch (e) { console.warn('Bad hash scenario', e); }
+  return false;
+}
+
+window.addEventListener('message', (ev) => {
+  if (!ev.data || ev.data.type !== 'puzzle:load' || !ev.data.scenario) return;
+  try { loadFromJSON(ev.data.scenario); } catch (e) { console.warn(e); }
+});
+
+if (!tryLoadEmbeddedScenario()) {
+  initDemo();
+}
 render();
+// Tell the parent we are ready
+try { window.parent && window.parent.postMessage({ type: 'puzzle:ready' }, '*'); } catch(e) {}
 
 // cleanup blobs on unload
 window.addEventListener('beforeunload', () => {
   Object.values(blobRegistry).forEach(url => URL.revokeObjectURL(url));
 });
+
 </script>
 </body>
 </html>
