@@ -478,7 +478,138 @@ const Media = () => {
             </div>
           )}
         </section>
+
+        {/* ──────────── PUZZLES SECTION ──────────── */}
+        <section className="p-8 md:p-16 lg:p-24 max-w-6xl mx-auto border-t border-border">
+          <div className="flex items-center gap-3 mb-4">
+            <Puzzle className="w-4 h-4 opacity-60" />
+            <span className="text-xs tracking-[0.2em] font-body text-muted-foreground">
+              {tr("media.section.puzzles").toUpperCase()}
+            </span>
+          </div>
+          <h2 className="font-serif text-4xl md:text-5xl italic font-light mb-4">
+            {lang === "el" ? "Διαδραστικά Puzzle" : "Interactive Puzzles"}
+          </h2>
+          <p className="font-body text-sm font-light text-muted-foreground max-w-2xl mb-12">
+            {tr("media.puzzles.desc")}
+          </p>
+
+          {/* Puzzle import zone */}
+          <div
+            onDrop={onPuzzleDrop}
+            onDragOver={onDragOver}
+            onClick={() => puzzleFileRef.current?.click()}
+            className="border border-dashed border-border bg-card/40 p-10 mb-6 cursor-pointer hover:bg-card transition-colors text-center"
+          >
+            <Upload className="w-6 h-6 mx-auto mb-3 opacity-60" />
+            <p className="font-serif text-lg italic mb-1">{tr("media.puzzles.drop")}</p>
+            <p className="text-[10px] tracking-[0.2em] font-body text-muted-foreground uppercase">
+              {tr("media.hint")}
+            </p>
+            <input
+              ref={puzzleFileRef}
+              type="file"
+              accept=".json,application/json"
+              multiple
+              className="hidden"
+              onChange={(e) => handlePuzzleFiles(e.target.files)}
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 mb-10">
+            <button
+              onClick={() => puzzleFileRef.current?.click()}
+              className="text-xs tracking-[0.2em] font-body border border-foreground px-4 py-2 hover:bg-foreground hover:text-background transition-colors"
+            >
+              {tr("media.importBtn")}
+            </button>
+            <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground ml-auto uppercase">
+              {allPuzzles.length} {tr("media.puzzles.count")}
+            </span>
+          </div>
+
+          {/* Puzzles grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {allPuzzles.map((p, idx) => {
+              const accent = ACCENTS[idx % ACCENTS.length];
+              const displayTitle = p.builtin
+                ? (lang === "el" ? "Αρχαία Αγορά Αθηνών" : "Ancient Agora of Athens")
+                : p.title;
+              return (
+                <article key={p.id} className="border border-border bg-card/40 p-6 flex flex-col">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div
+                      className="w-12 h-12 flex items-center justify-center shrink-0 font-serif italic text-xl"
+                      style={{ background: "hsl(var(--foreground))", color: accent }}
+                    >
+                      ◆
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground uppercase">
+                        {p.builtin ? (lang === "el" ? "Ενσωματωμένο" : "Built-in") : "Custom"}
+                      </span>
+                      <h3 className="font-serif text-xl md:text-2xl italic font-light mt-1">{displayTitle}</h3>
+                      <p className="text-[10px] tracking-[0.15em] font-body uppercase text-muted-foreground mt-1">
+                        {p.pairs} {tr("media.puzzles.pairs")}
+                      </p>
+                    </div>
+                    {!p.builtin && (
+                      <button
+                        onClick={() => removePuzzle(p.id)}
+                        className="p-2 text-muted-foreground hover:text-destructive transition-colors"
+                        aria-label="Remove"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-3 mt-auto pt-2">
+                    <button
+                      onClick={() => setPlaying(p)}
+                      className="inline-flex items-center gap-2 text-xs tracking-[0.2em] font-body border border-foreground px-4 py-2 hover:bg-foreground hover:text-background transition-colors"
+                    >
+                      <Play className="w-3 h-3" /> {tr("media.puzzles.play")}
+                    </button>
+                    {!p.builtin && p.scenario && (
+                      <button
+                        onClick={() => exportPuzzleJson(p)}
+                        className="inline-flex items-center gap-2 text-xs tracking-[0.2em] font-body border border-border px-4 py-2 hover:bg-card transition-colors"
+                      >
+                        <Download className="w-3 h-3" /> {tr("media.export")}
+                      </button>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
       </div>
+
+      {/* Play modal */}
+      {playing && (
+        <div className="fixed inset-0 z-[95] flex items-center justify-center p-2 md:p-6">
+          <div className="absolute inset-0 bg-foreground/80" onClick={() => setPlaying(null)} />
+          <div className="relative bg-background border border-border w-full h-full max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
+              <h3 className="font-serif text-lg italic">
+                {playing.builtin
+                  ? (lang === "el" ? "Αρχαία Αγορά Αθηνών" : "Ancient Agora of Athens")
+                  : playing.title}
+              </h3>
+              <button onClick={() => setPlaying(null)} aria-label="Close"><X className="w-5 h-5" /></button>
+            </div>
+            <iframe
+              ref={iframeRef}
+              src="/puzzles/glb-matcher.html"
+              className="flex-1 w-full border-0"
+              title="Puzzle"
+              allow="xr-spatial-tracking; fullscreen"
+            />
+          </div>
+        </div>
+      )}
+
 
       {modal && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
