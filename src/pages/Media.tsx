@@ -165,6 +165,87 @@ const Media = () => {
     [lessons]
   );
 
+  // ---------- Puzzles state ----------
+  const [puzzles, setPuzzles] = useState<PuzzleScenario[]>(() => {
+    try {
+      const raw = localStorage.getItem(PUZZLES_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return [];
+  });
+  const [playing, setPlaying] = useState<PuzzleScenario | null>(null);
+  const puzzleFileRef = useRef<HTMLInputElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => { localStorage.setItem(PUZZLES_KEY, JSON.stringify(puzzles)); }, [puzzles]);
+
+  // Send scenario to iframe when ready
+  useEffect(() => {
+    if (!playing) return;
+    const onMsg = (ev: MessageEvent) => {
+      if (ev.data?.type === "puzzle:ready" && playing.scenario && iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage({ type: "puzzle:load", scenario: playing.scenario }, "*");
+      }
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, [playing]);
+
+  async function handlePuzzleFiles(files: FileList | null) {
+    if (!files?.length) return;
+    setStatus({ type: "info", msg: lang === "el" ? "Φόρτωση..." : "Loading..." });
+    try {
+      let added = 0;
+      const next: PuzzleScenario[] = [...puzzles];
+      for (const file of Array.from(files)) {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!data.characters || !data.artifacts) {
+          throw new Error(lang === "el"
+            ? `Μη έγκυρο σενάριο puzzle (${file.name}): λείπουν characters/artifacts.`
+            : `Invalid puzzle scenario (${file.name}): missing characters/artifacts.`);
+        }
+        const pairs = Math.min(
+          (data.characters || []).filter((c: any) => c?.name).length,
+          (data.artifacts || []).filter((a: any) => a?.name).length,
+        );
+        next.push({
+          id: `puzzle_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          title: data.title || file.name.replace(/\.json$/i, ""),
+          pairs,
+          scenario: data,
+          addedAt: Date.now(),
+        });
+        added++;
+      }
+      setPuzzles(next);
+      setStatus({ type: "ok", msg: lang === "el" ? `Εισήχθησαν ${added} puzzle.` : `Imported ${added} puzzles.` });
+    } catch (e: any) {
+      setStatus({ type: "err", msg: (lang === "el" ? "Σφάλμα: " : "Error: ") + e.message });
+    }
+    setTimeout(() => setStatus(null), 4000);
+    if (puzzleFileRef.current) puzzleFileRef.current.value = "";
+  }
+
+  function removePuzzle(id: string) {
+    if (!confirm(lang === "el" ? "Διαγραφή puzzle;" : "Remove this puzzle?")) return;
+    setPuzzles(prev => prev.filter(p => p.id !== id));
+  }
+
+  function exportPuzzleJson(p: PuzzleScenario) {
+    if (!p.scenario) return;
+    const blob = new Blob([JSON.stringify(p.scenario, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `${p.title.replace(/\s+/g, "_")}.json`; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const onPuzzleDrop = (e: React.DragEvent) => { e.preventDefault(); handlePuzzleFiles(e.dataTransfer.files); };
+
+  const allPuzzles = useMemo(() => [DEFAULT_PUZZLE, ...puzzles], [puzzles]);
+
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
