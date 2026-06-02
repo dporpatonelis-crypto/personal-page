@@ -11,6 +11,31 @@ export const t: Translations = {
   "nav.academic": { en: "ACADEMIC WORK", el: "ΑΚΑΔΗΜΑΪΚΟ ΕΡΓΟ" },
   "nav.apps": { en: "EDU APPS", el: "ΕΚΠ. ΕΦΑΡΜΟΓΕΣ" },
   "nav.portal": { en: "STUDENT PORTAL", el: "ΦΟΙΤΗΤΙΚΗ ΠΥΛΗ" },
+  "nav.media": { en: "MEDIA", el: "ΥΛΙΚΟ" },
+
+  // Media page
+  "media.label": { en: "MEDIA LIBRARY", el: "ΒΙΒΛΙΟΘΗΚΗ ΥΛΙΚΟΥ" },
+  "media.title": { en: "Lessons & Media", el: "Μαθήματα & Υλικό" },
+  "media.desc": {
+    en: "Import a JSON file exported from My Notebook. Each chapter becomes a lesson with its audio, slides, PDFs, notes, and embedded content. Your library is saved locally in this browser.",
+    el: "Εισαγάγετε ένα αρχείο JSON από το My Notebook. Κάθε κεφάλαιο γίνεται μάθημα με ήχο, διαφάνειες, PDF, σημειώσεις και ενσωματωμένο περιεχόμενο. Η βιβλιοθήκη αποθηκεύεται τοπικά στον φυλλομετρητή.",
+  },
+  "media.drop": { en: "Drop notebook JSON here", el: "Αφήστε το JSON εδώ" },
+  "media.hint": { en: "or click to select a file", el: "ή πατήστε για επιλογή αρχείου" },
+  "media.importBtn": { en: "IMPORT JSON", el: "ΕΙΣΑΓΩΓΗ JSON" },
+  "media.export": { en: "EXPORT", el: "ΕΞΑΓΩΓΗ" },
+  "media.clear": { en: "Clear all", el: "Διαγραφή όλων" },
+  "media.lessons": { en: "lessons", el: "μαθήματα" },
+  "media.items": { en: "items", el: "στοιχεία" },
+  "media.empty": { en: "Your library is empty", el: "Η βιβλιοθήκη είναι κενή" },
+  "media.emptyHint": { en: "Import a notebook JSON to begin", el: "Εισαγάγετε ένα JSON για να ξεκινήσετε" },
+  "media.tab.audio": { en: "Audio", el: "Ήχος" },
+  "media.tab.slides": { en: "Slides", el: "Διαφάνειες" },
+  "media.tab.pdf": { en: "PDF", el: "PDF" },
+  "media.tab.text": { en: "Notes", el: "Σημειώσεις" },
+  "media.open": { en: "OPEN", el: "ΑΝΟΙΓΜΑ" },
+  "media.download": { en: "DOWNLOAD", el: "ΛΗΨΗ" },
+  "media.read": { en: "READ", el: "ΑΝΑΓΝΩΣΗ" },
   "nav.navigation": { en: "Navigation", el: "Πλοήγηση" },
 
   // Hero

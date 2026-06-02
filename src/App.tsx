@@ -10,6 +10,7 @@ import About from "./pages/About.tsx";
 import AcademicWork from "./pages/AcademicWork.tsx";
 import EducationalApps from "./pages/EducationalApps.tsx";
 import StudentPortal from "./pages/StudentPortal.tsx";
+import Media from "./pages/Media.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/academic-work" element={<AcademicWork />} />
               <Route path="/educational-apps" element={<EducationalApps />} />
               <Route path="/student-portal" element={<StudentPortal />} />
+              <Route path="/media" element={<Media />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

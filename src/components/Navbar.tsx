@@ -13,6 +13,7 @@ const Navbar = () => {
     { label: tr("nav.about"), path: "/about" },
     { label: tr("nav.academic"), path: "/academic-work" },
     { label: tr("nav.apps"), path: "/educational-apps" },
+    { label: tr("nav.media"), path: "/media" },
   ];
 
   return (
