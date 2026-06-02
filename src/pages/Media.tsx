@@ -25,7 +25,27 @@ interface Lesson {
 }
 
 const STORAGE_KEY = "media-library-lessons-v1";
+const PUZZLES_KEY = "media-library-puzzles-v1";
 const ACCENTS = ["#c9a84c", "#8296b0", "#a3c585", "#c17c74", "#9b72cf", "#e8a87c"];
+
+// ---------- Puzzle types ----------
+interface PuzzleScenario {
+  id: string;
+  title: string;
+  pairs: number;
+  scenario: any; // raw JSON for the GLB matcher
+  addedAt: number;
+  builtin?: boolean;
+}
+
+const DEFAULT_PUZZLE: PuzzleScenario = {
+  id: "builtin_agora",
+  title: "Αρχαία Αγορά Αθηνών",
+  pairs: 6,
+  scenario: null, // null => puzzle loads its own initDemo
+  addedAt: 0,
+  builtin: true,
+};
 
 // ---------- Notebook JSON -> Lessons ----------
 function convertNotebookToLessons(data: any): Lesson[] {
