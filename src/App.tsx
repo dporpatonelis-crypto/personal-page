@@ -10,6 +10,7 @@ import About from "./pages/About.tsx";
 import AcademicWork from "./pages/AcademicWork.tsx";
 import EducationalApps from "./pages/EducationalApps.tsx";
 import StudentPortal from "./pages/StudentPortal.tsx";
+import Media from "./pages/Media.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
