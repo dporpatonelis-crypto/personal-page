@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Puzzle Αντιστοίχισης · History Explorer</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   ROOT — ANCIENT STONE AESTHETIC
+══════════════════════════════════════════ */
+:root {
+  --stone:    #f2ede4;
+  --stone2:   #e8e0d0;
+  --stone3:   #d4c9b4;
+  --ink:      #1a1208;
+  --ink2:     #3d3220;
+  --ink3:     #6b5a3e;
+  --gold:     #9a7a2a;
+  --gold2:    #c4a44a;
+  --reveal:   #4a7c59;
+  --reveal2:  #2d5c3e;
+  --hidden:   #8b3a1f;
+  --border:   rgba(154,122,42,0.25);
+  --shadow:   0 4px 24px rgba(26,18,8,0.15);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--stone);
+  color: var(--ink);
+  font-family: 'Crimson Text', serif;
+  min-height: 100vh;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+}
+
+/* ══════ HEADER ══════ */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--ink);
+  border-bottom: 2px solid var(--gold);
+  padding: 12px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.topbar-title {
+  font-family: 'Cinzel', serif;
+  font-size: 15px; font-weight: 600;
+  color: var(--gold2);
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+.topbar-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.tb-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold2);
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.tb-btn:hover { background: var(--gold); color: var(--ink); }
+.tb-btn.primary { background: var(--gold); color: var(--ink); font-weight: 700; }
+.tb-btn.primary:hover { background: var(--gold2); }
+.tb-btn.danger { border-color: #c0392b; color: #e57373; }
+.tb-btn.danger:hover { background: #c0392b; color: white; }
+
+/* ══════ SCENARIO META ══════ */
+.scenario-bar {
+  background: var(--ink2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.scenario-title-input {
+  font-family: 'Cinzel', serif; font-size: 14px;
+  color: var(--gold2); background: transparent;
+  border: none; border-bottom: 1px dashed rgba(196,164,74,0.4);
+  outline: none; min-width: 200px; padding: 2px 6px;
+  flex: 1;
+}
+.scenario-title-input::placeholder { color: rgba(196,164,74,0.35); }
+.scenario-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: rgba(196,164,74,0.5);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ══════ LAYOUT ══════ */
+.app-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 0;
+  min-height: calc(100vh - 88px);
+}
+
+.column-header {
+  background: var(--stone2);
+  border-bottom: 2px solid var(--border);
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 88px; z-index: 10;
+}
+.column-header.chars { border-right: 1px solid var(--border); }
+.col-title {
+  font-family: 'Cinzel', serif; font-size: 12px;
+  letter-spacing: 0.15em; color: var(--ink2); font-weight: 600;
+}
+.col-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--ink3);
+  letter-spacing: 0.1em;
+}
+
+.column-body {
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  align-items: stretch;
+}
+.column-body.chars { border-right: 1px solid var(--border); }
+
+/* ══════ CARD ══════ */
+.slot-card {
+  background: white;
+  border: 1.5px solid var(--border);
+  position: relative;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.slot-card:hover { box-shadow: var(--shadow); }
+
+.card-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--stone2);
+}
+.card-num {
+  font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700;
+  width: 22px; height: 22px;
+  background: var(--gold); color: var(--ink);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.card-name-input {
+  font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+  color: var(--ink); background: transparent;
+  border: none; outline: none; flex: 1;
+}
+.card-name-input::placeholder { color: var(--ink3); font-weight: 400; font-style: italic; }
+
+.card-viewer-wrap {
+  position: relative;
+  background: #e8e4dc;
+  overflow: hidden;
+}
+.card-viewer-wrap model-viewer {
+  width: 100%; height: 220px;
+  background: transparent;
+  --poster-color: transparent;
+}
+.card-viewer-empty {
+  height: 220px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px;
+  color: var(--ink3); font-size: 13px; font-style: italic;
+  cursor: pointer;
+  border: 2px dashed var(--border);
+  transition: border-color 0.2s, background 0.2s;
+}
+.card-viewer-empty:hover { border-color: var(--gold); background: rgba(154,122,42,0.05); }
+.card-viewer-empty svg { opacity: 0.3; }
+
+/* REVEAL OVERLAY */
+.reveal-overlay {
+  position: absolute; inset: 0;
+  background: rgba(26,18,8,0.85);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px;
+  z-index: 5;
+  transition: opacity 0.4s;
+}
+.reveal-overlay.hidden-overlay { opacity: 1; pointer-events: all; }
+.reveal-overlay.shown { opacity: 0; pointer-events: none; }
+
+.reveal-icon {
+  font-size: 36px; line-height: 1;
+  animation: pulse-slow 2s ease-in-out infinite;
+}
+@keyframes pulse-slow {
+  0%,100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+.reveal-label {
+  font-family: 'Cinzel', serif; font-size: 10px;
+  letter-spacing: 0.2em; color: rgba(196,164,74,0.6);
+  text-transform: uppercase;
+}
+.reveal-btn {
+  font-family: 'Cinzel', serif; font-size: 11px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 8px 20px;
+  background: var(--reveal); color: white;
+  border: none; cursor: pointer;
+  transition: background 0.18s;
+  margin-top: 4px;
+}
+.reveal-btn:hover { background: var(--reveal2); }
+
+/* MATCH BADGE */
+.match-badge {
+  position: absolute; top: 8px; right: 8px;
+  z-index: 6;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 0;
+  text-transform: uppercase;
+}
+.match-badge.matched {
+  background: var(--reveal); color: white;
+}
+.match-badge.unmatched {
+  background: rgba(139,58,31,0.8); color: #ffcc99;
+}
+
+/* CARD BODY */
+.card-body { padding: 10px 14px 12px; }
+
+.desc-input {
+  font-family: 'Crimson Text', serif; font-size: 14px;
+  color: var(--ink2); background: transparent;
+  border: none; outline: none; width: 100%;
+  resize: none; line-height: 1.5;
+  min-height: 36px;
+}
+.desc-input::placeholder { color: var(--ink3); font-style: italic; }
+
+.card-footer {
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; flex-wrap: wrap;
+}
+
+/* Match selector */
+.match-select {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  background: var(--stone2); color: var(--ink2);
+  outline: none; cursor: pointer;
+  flex: 1; min-width: 0;
+}
+.match-select:focus { border-color: var(--gold); }
+
+/* File load btn */
+.load-file-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  background: transparent; color: var(--ink3);
+  cursor: pointer; white-space: nowrap;
+  transition: all 0.15s;
+}
+.load-file-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* Hint text */
+.hint-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px;
+  background: rgba(154,122,42,0.06);
+  border-top: 1px solid var(--border);
+}
+.hint-input {
+  font-family: 'Crimson Text', serif; font-size: 12px;
+  font-style: italic; color: var(--ink3);
+  background: transparent; border: none; outline: none;
+  flex: 1;
+}
+.hint-input::placeholder { color: rgba(107,90,62,0.4); }
+.hint-icon { font-size: 12px; opacity: 0.5; }
+
+/* ══════ MATCHING PANEL ══════ */
+.match-panel {
+  grid-column: 1 / -1;
+  border-top: 2px solid var(--gold);
+  background: var(--ink);
+  padding: 20px 24px;
+}
+.match-panel-title {
+  font-family: 'Cinzel', serif; font-size: 13px;
+  color: var(--gold2); letter-spacing: 0.15em;
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.match-pairs-grid {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.match-pair {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(196,164,74,0.2);
+  padding: 6px 12px;
+  font-family: 'Crimson Text', serif; font-size: 14px;
+  color: rgba(242,237,228,0.8);
+  transition: all 0.2s;
+}
+.match-pair.revealed {
+  border-color: var(--reveal);
+  background: rgba(74,124,89,0.2);
+  color: #a8ddb8;
+}
+.match-pair.wrong {
+  border-color: #c0392b;
+  background: rgba(192,57,43,0.15);
+  color: #ffaaaa;
+}
+.pair-arrow { color: var(--gold); opacity: 0.6; font-size: 12px; }
+.pair-reveal-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ink3); flex-shrink: 0;
+  transition: background 0.3s;
+}
+.match-pair.revealed .pair-reveal-dot { background: var(--reveal); }
+
+/* ══════ MODALS ══════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(26,18,8,0.75);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: var(--stone);
+  border: 2px solid var(--gold);
+  max-width: 520px; width: 100%;
+  max-height: 80vh; overflow-y: auto;
+  padding: 28px;
+  animation: slideUp 0.22s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.modal-title {
+  font-family: 'Cinzel', serif; font-size: 16px;
+  color: var(--gold); letter-spacing: 0.12em;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.form-row { margin-bottom: 14px; }
+.form-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  text-transform: uppercase; letter-spacing: 0.15em;
+  color: var(--ink3); display: block; margin-bottom: 5px;
+}
+.form-input {
+  width: 100%; padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: white; color: var(--ink);
+  font-family: 'Crimson Text', serif; font-size: 15px;
+  outline: none;
+}
+.form-input:focus { border-color: var(--gold); }
+.form-textarea {
+  width: 100%; padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: white; color: var(--ink);
+  font-family: 'Crimson Text', serif; font-size: 14px;
+  font-style: italic; resize: vertical; min-height: 60px;
+  outline: none;
+}
+.form-textarea:focus { border-color: var(--gold); }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-btn {
+  flex: 1; padding: 10px;
+  font-family: 'Cinzel', serif; font-size: 11px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  cursor: pointer; border: 1px solid var(--border);
+  transition: all 0.18s;
+}
+.modal-btn.ok { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 700; }
+.modal-btn.ok:hover { background: var(--gold2); }
+.modal-btn.cancel { background: transparent; color: var(--ink2); }
+.modal-btn.cancel:hover { border-color: var(--ink2); }
+
+/* ══════ REVEAL ANIMATION ══════ */
+@keyframes revealFlash {
+  0%   { filter: brightness(3) saturate(0); }
+  40%  { filter: brightness(1.5) saturate(0.5); }
+  100% { filter: brightness(1) saturate(1); }
+}
+.just-revealed model-viewer { animation: revealFlash 0.8s ease forwards; }
+
+/* ══════ JSON TEXTAREA ══════ */
+.json-area {
+  width: 100%; min-height: 200px;
+  padding: 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; line-height: 1.6;
+  border: 1px solid var(--border); background: #111;
+  color: #c8e6c9; resize: vertical; outline: none;
+}
+
+/* ══════ STATUS TOAST ══════ */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--ink); color: var(--gold2);
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: 0.1em; padding: 10px 20px;
+  border: 1px solid var(--gold);
+  opacity: 0; pointer-events: none;
+  transition: all 0.3s; z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ══════ RESPONSIVE ══════ */
+@media (max-width: 768px) {
+  .app-body { grid-template-columns: 1fr; }
+  .column-body.chars { border-right: none; border-bottom: 1px solid var(--border); }
+  .column-header.chars { border-right: none; }
+  .match-pair { font-size: 12px; padding: 4px 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══════ TOPBAR ══════ -->
+<div class="topbar">
+  <span class="topbar-title">⚔ History Explorer · Puzzle Αντιστοίχισης</span>
+  <div class="topbar-actions">
+    <button class="tb-btn" onclick="openJsonModal('import')">↑ Import JSON</button>
+    <button class="tb-btn" onclick="exportJSON()">↓ Export JSON</button>
+    <button class="tb-btn primary" onclick="revealAll()">▶ Αποκάλυψη Όλων</button>
+    <button class="tb-btn danger" onclick="resetAll()">↺ Reset</button>
+  </div>
+</div>
+
+<!-- ══════ SCENARIO BAR ══════ -->
+<div class="scenario-bar">
+  <input class="scenario-title-input" id="scenarioTitle" type="text" placeholder="Τίτλος Σεναρίου..." value="Αρχαία Αγορά Αθηνών">
+  <span class="scenario-meta" id="scenarioMeta">6 χαρακτήρες · 6 αντικείμενα</span>
+</div>
+
+<!-- ══════ MAIN GRID ══════ -->
+<div class="app-body" id="appBody">
+
+  <!-- CHARACTERS COLUMN -->
+  <div>
+    <div class="column-header chars">
+      <span class="col-title">👤 Χαρακτήρες</span>
+      <span class="col-count" id="charsCount">6 slots</span>
+    </div>
+    <div class="column-body chars" id="charsColumn"></div>
+  </div>
+
+  <!-- ARTIFACTS COLUMN -->
+  <div>
+    <div class="column-header">
+      <span class="col-title">🏺 Αντικείμενα</span>
+      <span class="col-count" id="artsCount">6 slots</span>
+    </div>
+    <div class="column-body" id="artsColumn"></div>
+  </div>
+
+  <!-- MATCHING PANEL -->
+  <div class="match-panel">
+    <div class="match-panel-title">
+      <span>🔗 Αντιστοίχιση</span>
+      <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:rgba(196,164,74,0.4);letter-spacing:0.1em;">ΟΡΙΣΕ ΤΙΣ ΣΩΣΤΕΣ ΑΝΤΙΣΤΟΙΧΙΣΕΙΣ ΠΑΡΑΚΑΤΩ — ΕΜΦΑΝΙΖΟΝΤΑΙ ΣΤΗΝ ΤΑΞΗ ΜΕΤΑ ΤΗΝ ΑΠΟΚΑΛΥΨΗ</span>
+    </div>
+    <div class="match-pairs-grid" id="matchPairsGrid"></div>
+  </div>
+
+</div>
+
+<!-- ══════ JSON MODAL ══════ -->
+<div class="modal-overlay" id="jsonModal" onclick="if(event.target===this)closeJsonModal()">
+  <div class="modal-box">
+    <div class="modal-title" id="jsonModalTitle">Import JSON</div>
+    <textarea class="json-area" id="jsonArea" placeholder="Επικόλλησε JSON σεναρίου εδώ..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-btn ok" onclick="confirmJson()">Εφαρμογή</button>
+      <button class="modal-btn cancel" onclick="closeJsonModal()">Ακύρωση</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+const N = 6;
+
+let state = {
+  title: 'Αρχαία Αγορά Αθηνών',
+  characters: Array.from({length: N}, (_, i) => ({
+    id: `char_${i}`,
+    name: '',
+    description: '',
+    hint: '',
+    glb: '',
+    revealed: false,
+    correctMatch: ''  // artifact id
+  })),
+  artifacts: Array.from({length: N}, (_, i) => ({
+    id: `art_${i}`,
+    name: '',
+    description: '',
+    hint: '',
+    glb: '',
+    revealed: false
+  }))
+};
+
+// blobUrl registry per slot
+const blobRegistry = {};
+
+// ══════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════
+function render() {
+  document.getElementById('scenarioTitle').value = state.title;
+  renderColumn('charsColumn', state.characters, 'char');
+  renderColumn('artsColumn', state.artifacts, 'art');
+  renderMatchPanel();
+  updateMeta();
+}
+
+function renderColumn(containerId, items, type) {
+  const col = document.getElementById(containerId);
+  col.innerHTML = '';
+  items.forEach((item, idx) => {
+    col.appendChild(buildCard(item, idx, type));
+  });
+}
+
+function buildCard(item, idx, type) {
+  const wrap = document.createElement('div');
+  wrap.className = 'slot-card';
+  wrap.id = `card_${type}_${idx}`;
+
+  const isChar = type === 'char';
+  const label = isChar ? 'Χαρακτήρας' : 'Αντικείμενο';
+  const placeholder = isChar
+    ? ['Σωκράτης','Αριστοτέλης','Υπατία','Μ. Αλέξανδρος','Μ. Κωνσταντίνος','Ιωάννης Δαμασκηνός'][idx] || 'Όνομα...'
+    : ['Κώνειο','Βιολογικά','Αλεξάνδρεια','Ψηφιδωτό Πέλλας','Σταυρός Λαβάρου','Εικόνα'][idx] || 'Αντικείμενο...';
+
+  // match badge for chars only
+  const matchBadge = isChar && item.correctMatch
+    ? `<div class="match-badge ${item.revealed ? 'matched' : 'unmatched'}">${item.revealed ? '✓ Εμφανίστηκε' : '⬤ Κρυφό'}</div>`
+    : '';
+
+  // viewer or empty slot
+  let viewerHtml = '';
+  if (item.glb) {
+    const mvId = `mv_${type}_${idx}`;
+    viewerHtml = `
+      <div class="card-viewer-wrap${item.revealed ? '' : ''}" id="vwrap_${type}_${idx}">
+        <model-viewer
+          id="${mvId}"
+          src="${escHtml(item.glb)}"
+          camera-controls touch-action="pan-y"
+          auto-rotate rotation-per-second="12deg"
+          camera-orbit="45deg 75deg 2m"
+          exposure="1.1" shadow-intensity="0.4"
+          environment-image="neutral"
+          alt="${escHtml(item.name)}">
+        </model-viewer>
+        ${matchBadge}
+        ${buildOverlay(item, idx, type)}
+      </div>`;
+  } else {
+    viewerHtml = `
+      <div class="card-viewer-empty" onclick="triggerFileLoad(${idx},'${type}')" id="vwrap_${type}_${idx}">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path d="M4 16l4-4 4 4 4-6 4 6"/><rect x="2" y="3" width="20" height="18" rx="1"/>
+        </svg>
+        <span>Κλικ για φόρτωση GLB</span>
+        <span style="font-size:11px;opacity:0.5">ή σύρε αρχείο εδώ</span>
+      </div>`;
+  }
+
+  // match selector for chars
+  const matchSelector = isChar ? buildMatchSelector(item, idx) : '';
+
+  wrap.innerHTML = `
+    <div class="card-header">
+      <div class="card-num">${idx + 1}</div>
+      <input class="card-name-input" type="text"
+        placeholder="${placeholder}"
+        value="${escHtml(item.name)}"
+        oninput="updateField('${type}',${idx},'name',this.value)">
+      ${item.glb ? `<button class="load-file-btn" onclick="triggerFileLoad(${idx},'${type}')">↻ GLB</button>` : ''}
+    </div>
+    ${viewerHtml}
+    <div class="card-body">
+      <textarea class="desc-input" rows="2"
+        placeholder="Σύντομη περιγραφή..."
+        oninput="updateField('${type}',${idx},'description',this.value)">${escHtml(item.description)}</textarea>
+    </div>
+    <div class="hint-row">
+      <span class="hint-icon">💬</span>
+      <input class="hint-input" type="text"
+        placeholder="${isChar ? 'Ερώτηση αποκάλυψης...' : 'Clue / υπόδειξη...'}"
+        value="${escHtml(item.hint)}"
+        oninput="updateField('${type}',${idx},'hint',this.value)">
+    </div>
+    ${matchSelector}
+    <input type="file" accept=".glb,.gltf"
+      id="fileInput_${type}_${idx}"
+      style="display:none"
+      onchange="handleFileLoad(event,${idx},'${type}')">
+  `;
+  return wrap;
+}
+
+function buildOverlay(item, idx, type) {
+  if (type !== 'art') return ''; // only artifacts get reveal overlay
+  const shown = item.revealed;
+  return `
+    <div class="reveal-overlay ${shown ? 'shown' : 'hidden-overlay'}" id="overlay_${type}_${idx}">
+      <div class="reveal-icon">🔒</div>
+      <div class="reveal-label">Κρυφό Αντικείμενο</div>
+      <button class="reveal-btn" onclick="revealItem(${idx},'${type}')">▶ Αποκάλυψη</button>
+    </div>`;
+}
+
+function buildMatchSelector(item, idx) {
+  const opts = state.artifacts.map((a, ai) =>
+    `<option value="${ai}" ${item.correctMatch === String(ai) ? 'selected' : ''}>${a.name || `Αντικείμενο ${ai+1}`}</option>`
+  ).join('');
+  return `
+    <div class="card-footer">
+      <select class="match-select" onchange="updateField('char',${idx},'correctMatch',this.value)"
+        title="Σωστή αντιστοίχιση">
+        <option value="">— Σωστή αντιστοίχιση —</option>
+        ${opts}
+      </select>
+    </div>`;
+}
+
+function renderMatchPanel() {
+  const grid = document.getElementById('matchPairsGrid');
+  grid.innerHTML = '';
+  state.characters.forEach((ch, i) => {
+    if (!ch.name && !ch.correctMatch) return;
+    const artIdx = parseInt(ch.correctMatch);
+    const art = isNaN(artIdx) ? null : state.artifacts[artIdx];
+    const charLabel = ch.name || `Χαρ. ${i+1}`;
+    const artLabel  = art ? (art.name || `Αντικ. ${artIdx+1}`) : '—';
+    const revealed  = art ? art.revealed : false;
+
+    const pair = document.createElement('div');
+    pair.className = `match-pair ${revealed ? 'revealed' : ''}`;
+    pair.innerHTML = `
+      <div class="pair-reveal-dot"></div>
+      <span>${escHtml(charLabel)}</span>
+      <span class="pair-arrow">→</span>
+      <span>${escHtml(artLabel)}</span>
+      ${art && !art.revealed
+        ? `<button class="tb-btn" style="padding:2px 8px;font-size:9px;margin-left:6px" onclick="revealItem(${artIdx},'art')">▶</button>`
+        : ''}
+    `;
+    grid.appendChild(pair);
+  });
+  if (!grid.children.length) {
+    grid.innerHTML = `<span style="font-family:'Crimson Text',serif;font-size:14px;font-style:italic;color:rgba(196,164,74,0.35);">Ορίσε αντιστοιχίσεις στις κάρτες χαρακτήρων ↑</span>`;
+  }
+}
+
+// ══════════════════════════════════════════
+//  UPDATE HELPERS
+// ══════════════════════════════════════════
+function updateField(type, idx, field, value) {
+  const arr = type === 'char' ? state.characters : state.artifacts;
+  arr[idx][field] = value;
+  if (field === 'name' || field === 'correctMatch') {
+    renderMatchPanel();
+    // re-render match selectors in all char cards
+    if (field === 'name' && type === 'art') {
+      state.characters.forEach((_, ci) => {
+        const footer = document.querySelector(`#card_char_${ci} .card-footer`);
+        if (footer) footer.outerHTML = buildMatchSelector(state.characters[ci], ci);
+      });
+    }
+  }
+  updateMeta();
+}
+
+function updateMeta() {
+  const filled = (arr) => arr.filter(x => x.name || x.glb).length;
+  document.getElementById('scenarioMeta').textContent =
+    `${filled(state.characters)} χαρακτήρες · ${filled(state.artifacts)} αντικείμενα`;
+}
+
+// ══════════════════════════════════════════
+//  FILE LOADING
+// ══════════════════════════════════════════
+function triggerFileLoad(idx, type) {
+  document.getElementById(`fileInput_${type}_${idx}`)?.click();
+}
+
+function handleFileLoad(evt, idx, type) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const key = `${type}_${idx}`;
+  if (blobRegistry[key]) URL.revokeObjectURL(blobRegistry[key]);
+  const url = URL.createObjectURL(file);
+  blobRegistry[key] = url;
+
+  const arr = type === 'char' ? state.characters : state.artifacts;
+  arr[idx].glb = url;
+  if (!arr[idx].name) arr[idx].name = file.name.replace(/\.(glb|gltf)$/i, '');
+
+  // Re-render only this card
+  const col = type === 'char' ? 'charsColumn' : 'artsColumn';
+  const col_el = document.getElementById(col);
+  const oldCard = document.getElementById(`card_${type}_${idx}`);
+  const newCard = buildCard(arr[idx], idx, type);
+  if (oldCard) col_el.replaceChild(newCard, oldCard);
+  else col_el.appendChild(newCard);
+
+  renderMatchPanel();
+  updateMeta();
+  toast(`✓ ${file.name} φορτώθηκε`);
+}
+
+// Drag & drop on empty slots
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  const target = e.target.closest('.card-viewer-empty');
+  if (!target) return;
+  const card = target.closest('.slot-card');
+  if (!card) return;
+  const [, type, idx] = card.id.split('_');
+  const file = e.dataTransfer.files[0];
+  if (!file || !/\.glb$/i.test(file.name)) return;
+  const fakeEvt = { target: { files: [file] } };
+  handleFileLoad(fakeEvt, parseInt(idx), type);
+});
+
+// ══════════════════════════════════════════
+//  REVEAL LOGIC
+// ══════════════════════════════════════════
+function revealItem(idx, type) {
+  const arr = type === 'char' ? state.characters : state.artifacts;
+  arr[idx].revealed = true;
+
+  const overlay = document.getElementById(`overlay_${type}_${idx}`);
+  const wrap    = document.getElementById(`vwrap_${type}_${idx}`);
+
+  if (overlay) {
+    overlay.classList.remove('hidden-overlay');
+    overlay.classList.add('shown');
+  }
+  if (wrap) wrap.classList.add('just-revealed');
+
+  renderMatchPanel();
+
+  // Find character whose match this is and update badge
+  if (type === 'art') {
+    state.characters.forEach((ch, ci) => {
+      if (ch.correctMatch === String(idx)) {
+        const badge = document.querySelector(`#card_char_${ci} .match-badge`);
+        if (badge) {
+          badge.className = 'match-badge matched';
+          badge.textContent = '✓ Εμφανίστηκε';
+        }
+      }
+    });
+  }
+
+  const name = arr[idx].name || (type === 'art' ? `Αντικείμενο ${idx+1}` : `Χαρακτήρας ${idx+1}`);
+  toast(`🔓 ${name} αποκαλύφθηκε`);
+}
+
+function revealAll() {
+  if (!confirm('Αποκάλυψη ΟΛΩΝ των αντικειμένων;')) return;
+  state.artifacts.forEach((_, i) => {
+    if (!state.artifacts[i].revealed) revealItem(i, 'art');
+  });
+}
+
+function resetAll() {
+  if (!confirm('Reset αποκαλύψεων; (τα GLB και ονόματα παραμένουν)')) return;
+  state.artifacts.forEach(a => a.revealed = false);
+  state.characters.forEach(c => c.revealed = false);
+  render();
+  toast('↺ Reset ολοκληρώθηκε');
+}
+
+// ══════════════════════════════════════════
+//  JSON IMPORT / EXPORT
+// ══════════════════════════════════════════
+let jsonModalMode = 'import';
+
+function openJsonModal(mode) {
+  jsonModalMode = mode;
+  const modal = document.getElementById('jsonModal');
+  const title = document.getElementById('jsonModalTitle');
+  const area  = document.getElementById('jsonArea');
+  if (mode === 'export') {
+    title.textContent = 'Export JSON Σεναρίου';
+    area.value = buildExportJSON();
+  } else {
+    title.textContent = 'Import JSON Σεναρίου';
+    area.value = '';
+    area.placeholder = 'Επικόλλησε JSON σεναρίου εδώ...';
+  }
+  modal.classList.add('open');
+  if (mode === 'import') setTimeout(() => area.focus(), 100);
+}
+
+function closeJsonModal() {
+  document.getElementById('jsonModal').classList.remove('open');
+}
+
+function confirmJson() {
+  if (jsonModalMode === 'export') { closeJsonModal(); return; }
+  const raw = document.getElementById('jsonArea').value.trim();
+  try {
+    const data = JSON.parse(raw);
+    loadFromJSON(data);
+    closeJsonModal();
+    toast('✓ JSON φορτώθηκε');
+  } catch(e) {
+    alert('Μη έγκυρο JSON: ' + e.message);
+  }
+}
+
+function buildExportJSON() {
+  const clean = {
+    title: state.title,
+    characters: state.characters.map(c => ({
+      id: c.id, name: c.name, description: c.description,
+      hint: c.hint, glb: c.glb.startsWith('blob:') ? '[local file]' : c.glb,
+      correctMatch: c.correctMatch
+    })),
+    artifacts: state.artifacts.map(a => ({
+      id: a.id, name: a.name, description: a.description,
+      hint: a.hint, glb: a.glb.startsWith('blob:') ? '[local file]' : a.glb
+    }))
+  };
+  return JSON.stringify(clean, null, 2);
+}
+
+function exportJSON() {
+  const json = buildExportJSON();
+  const blob = new Blob([json], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (state.title || 'scenario').replace(/\s+/g,'_') + '.json';
+  a.click();
+  toast('↓ JSON αποθηκεύτηκε');
+}
+
+function loadFromJSON(data) {
+  if (data.title) state.title = data.title;
+
+  if (data.characters) {
+    data.characters.forEach((c, i) => {
+      if (i >= N) return;
+      const s = state.characters[i];
+      s.name        = c.name        || '';
+      s.description = c.description || '';
+      s.hint        = c.hint        || '';
+      s.correctMatch= c.correctMatch|| '';
+      // glb: if it's not a blob/local ref, load it
+      if (c.glb && !c.glb.startsWith('[local')) s.glb = c.glb;
+    });
+  }
+  if (data.artifacts) {
+    data.artifacts.forEach((a, i) => {
+      if (i >= N) return;
+      const s = state.artifacts[i];
+      s.name        = a.name        || '';
+      s.description = a.description || '';
+      s.hint        = a.hint        || '';
+      if (a.glb && !a.glb.startsWith('[local')) s.glb = a.glb;
+    });
+  }
+  render();
+}
+
+// ══════════════════════════════════════════
+//  SCENARIO TITLE
+// ══════════════════════════════════════════
+document.getElementById('scenarioTitle').addEventListener('input', function() {
+  state.title = this.value;
+});
+
+// ══════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/[&<>"']/g, m =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════════════════
+//  INIT WITH DEMO DATA
+// ══════════════════════════════════════════
+function initDemo() {
+  const chars = [
+    { name: 'Σωκράτης',         hint: 'Ποιο ήταν το τελευταίο ποτό του;',         correctMatch: '0' },
+    { name: 'Αριστοτέλης',      hint: 'Πού ίδρυσε τη σχολή του;',                  correctMatch: '1' },
+    { name: 'Υπατία',           hint: 'Σε ποια πόλη δίδαξε;',                       correctMatch: '2' },
+    { name: 'Μ. Αλέξανδρος',    hint: 'Ποιο ψηφιδωτό τον απεικονίζει;',            correctMatch: '3' },
+    { name: 'Μ. Κωνσταντίνος',  hint: 'Ποιο σύμβολο υιοθέτησε στη μάχη;',         correctMatch: '4' },
+    { name: 'Ιωάννης Δαμ.',     hint: 'Ποιο έργο έγραψε για τις ιερές εικόνες;',  correctMatch: '5' },
+  ];
+  const arts = [
+    { name: 'Κώνειο',           hint: 'Το δηλητήριο της Αθήνας' },
+    { name: 'Λύκειο',           hint: 'Σχολή στην Αθήνα, 335 π.Χ.' },
+    { name: 'Αλεξάνδρεια',      hint: 'Η πόλη της γνώσης' },
+    { name: 'Ψηφιδωτό Πέλλας',  hint: 'Η μάχη στη Σιδώνα' },
+    { name: 'Λάβαρο',           hint: 'ΕΝ ΤΟΥΤΩ ΝΙΚΑ' },
+    { name: 'Εικόνα Χριστού',   hint: 'Προστασία της ορθόδοξης πίστης' },
+  ];
+  chars.forEach((c, i) => Object.assign(state.characters[i], c));
+  arts.forEach((a, i)  => Object.assign(state.artifacts[i],  a));
+}
+
+initDemo();
+render();
+
+// cleanup blobs on unload
+window.addEventListener('beforeunload', () => {
+  Object.values(blobRegistry).forEach(url => URL.revokeObjectURL(url));
+});
+</script>
+</body>
+</html>
