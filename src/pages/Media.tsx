@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Upload, Trash2, ChevronDown, FileText, Headphones, Presentation, FileType, ExternalLink, X, Download } from "lucide-react";
+import { Upload, Trash2, ChevronDown, FileText, Headphones, Presentation, FileType, ExternalLink, X, Download, Puzzle, Play } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SettingsPanel from "@/components/SettingsPanel";
