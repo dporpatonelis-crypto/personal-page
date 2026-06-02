@@ -235,12 +235,12 @@ const Media = () => {
               {lessons.map((lesson) => {
                 const isOpen = expanded[lesson.id] ?? false;
                 const tab = activeTab[lesson.id] ?? firstTab(lesson);
-                const tabs: { key: TabKey; label: string; icon: any; count: number }[] = [
-                  { key: "audio", label: tr("media.tab.audio"), icon: Headphones, count: lesson.media.audio.length },
-                  { key: "slides", label: tr("media.tab.slides"), icon: Presentation, count: lesson.media.slides.length },
-                  { key: "pdf", label: tr("media.tab.pdf"), icon: FileType, count: lesson.media.pdf.length },
-                  { key: "text", label: tr("media.tab.text"), icon: FileText, count: lesson.media.text.length },
-                ].filter(t => t.count > 0);
+                const tabs = ([
+                  { key: "audio" as TabKey, label: tr("media.tab.audio"), icon: Headphones, count: lesson.media.audio.length },
+                  { key: "slides" as TabKey, label: tr("media.tab.slides"), icon: Presentation, count: lesson.media.slides.length },
+                  { key: "pdf" as TabKey, label: tr("media.tab.pdf"), icon: FileType, count: lesson.media.pdf.length },
+                  { key: "text" as TabKey, label: tr("media.tab.text"), icon: FileText, count: lesson.media.text.length },
+                ]).filter(t => t.count > 0);
 
                 return (
                   <div key={lesson.id} className="border border-border bg-card/40">
