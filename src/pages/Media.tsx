@@ -356,22 +356,26 @@ const Media = () => {
             >
               {tr("media.importBtn")}
             </button>
-            {lessons.length > 0 && (
+            {displayedLessons.length > 0 && (
               <>
-                <button
-                  onClick={exportJson}
-                  className="text-xs tracking-[0.2em] font-body border border-border px-4 py-2 hover:bg-card transition-colors inline-flex items-center gap-2"
-                >
-                  <Download className="w-3 h-3" /> {tr("media.export")}
-                </button>
-                <button
-                  onClick={clearAll}
-                  className="text-xs tracking-[0.2em] font-body text-muted-foreground underline underline-offset-4 hover:opacity-60"
-                >
-                  {tr("media.clear")}
-                </button>
+                {lessons.length > 0 && (
+                  <>
+                    <button
+                      onClick={exportJson}
+                      className="text-xs tracking-[0.2em] font-body border border-border px-4 py-2 hover:bg-card transition-colors inline-flex items-center gap-2"
+                    >
+                      <Download className="w-3 h-3" /> {tr("media.export")}
+                    </button>
+                    <button
+                      onClick={clearAll}
+                      className="text-xs tracking-[0.2em] font-body text-muted-foreground underline underline-offset-4 hover:opacity-60"
+                    >
+                      {tr("media.clear")}
+                    </button>
+                  </>
+                )}
                 <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground ml-auto uppercase">
-                  {lessons.length} {tr("media.lessons")} · {totalCount} {tr("media.items")}
+                  {displayedLessons.length} {tr("media.lessons")} · {totalCount} {tr("media.items")}
                 </span>
               </>
             )}
