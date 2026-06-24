@@ -191,9 +191,10 @@ const Media = () => {
   const onDrop = (e: React.DragEvent) => { e.preventDefault(); handleFiles(e.dataTransfer.files); };
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
 
+  const displayedLessons = useMemo(() => [...remoteLessons, ...lessons], [remoteLessons, lessons]);
   const totalCount = useMemo(
-    () => lessons.reduce((s, l) => s + l.media.audio.length + l.media.slides.length + l.media.pdf.length + l.media.text.length, 0),
-    [lessons]
+    () => displayedLessons.reduce((s, l) => s + l.media.audio.length + l.media.slides.length + l.media.pdf.length + l.media.text.length, 0),
+    [displayedLessons]
   );
 
   // ---------- Puzzles state ----------
