@@ -22,6 +22,7 @@ interface Lesson {
   description: string;
   accent: string;
   media: { audio: AudioItem[]; slides: SlideItem[]; pdf: PdfItem[]; text: TextItem[] };
+  remote?: boolean;
 }
 
 const STORAGE_KEY = "media-library-lessons-v1";
@@ -36,6 +37,7 @@ interface PuzzleScenario {
   scenario: any; // raw JSON for the GLB matcher
   addedAt: number;
   builtin?: boolean;
+  remote?: boolean;
 }
 
 const DEFAULT_PUZZLE: PuzzleScenario = {
@@ -103,13 +105,42 @@ const Media = () => {
   const [lessons, setLessons] = useState<Lesson[]>(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
   });
+  const [remoteLessons, setRemoteLessons] = useState<Lesson[]>([]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<Record<string, TabKey>>({});
   const [status, setStatus] = useState<{ type: "ok" | "err" | "info"; msg: string } | null>(null);
   const [modal, setModal] = useState<{ title: string; html: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons)); }, [lessons]);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons.filter(l => !l.remote)));
+  }, [lessons]);
+
+  // Load permanent lessons bundled in public/data/lessons
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/data/lessons/index.json", { cache: "no-cache" });
+        if (!res.ok) return;
+        const files: string[] = await res.json();
+        const out: Lesson[] = [];
+        for (const f of files) {
+          try {
+            const r = await fetch(`/data/lessons/${f}`, { cache: "no-cache" });
+            if (!r.ok) continue;
+            const data = await r.json();
+            const conv = convertNotebookToLessons(data);
+            conv.forEach((l, i) => out.push({
+              ...l,
+              id: `remote_lesson_${f}_${i}`,
+              remote: true,
+            }));
+          } catch (e) { console.warn("Failed to load lesson", f, e); }
+        }
+        setRemoteLessons(out);
+      } catch (e) { /* no manifest, ignore */ }
+    })();
+  }, []);
 
   const firstTab = (l: Lesson): TabKey => {
     const order: TabKey[] = ["audio", "slides", "pdf", "text"];
@@ -160,9 +191,10 @@ const Media = () => {
   const onDrop = (e: React.DragEvent) => { e.preventDefault(); handleFiles(e.dataTransfer.files); };
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
 
+  const displayedLessons = useMemo(() => [...remoteLessons, ...lessons], [remoteLessons, lessons]);
   const totalCount = useMemo(
-    () => lessons.reduce((s, l) => s + l.media.audio.length + l.media.slides.length + l.media.pdf.length + l.media.text.length, 0),
-    [lessons]
+    () => displayedLessons.reduce((s, l) => s + l.media.audio.length + l.media.slides.length + l.media.pdf.length + l.media.text.length, 0),
+    [displayedLessons]
   );
 
   // ---------- Puzzles state ----------
@@ -173,11 +205,45 @@ const Media = () => {
     } catch {}
     return [];
   });
+  const [remotePuzzles, setRemotePuzzles] = useState<PuzzleScenario[]>([]);
   const [playing, setPlaying] = useState<PuzzleScenario | null>(null);
   const puzzleFileRef = useRef<HTMLInputElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  useEffect(() => { localStorage.setItem(PUZZLES_KEY, JSON.stringify(puzzles)); }, [puzzles]);
+  useEffect(() => { localStorage.setItem(PUZZLES_KEY, JSON.stringify(puzzles.filter(p => !p.remote))); }, [puzzles]);
+
+  // Load permanent puzzles bundled in public/data/puzzles
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/data/puzzles/index.json", { cache: "no-cache" });
+        if (!res.ok) return;
+        const files: string[] = await res.json();
+        const out: PuzzleScenario[] = [];
+        for (const f of files) {
+          try {
+            const r = await fetch(`/data/puzzles/${f}`, { cache: "no-cache" });
+            if (!r.ok) continue;
+            const data = await r.json();
+            if (!data.characters || !data.artifacts) continue;
+            const pairs = Math.min(
+              (data.characters || []).filter((c: any) => c?.name).length,
+              (data.artifacts || []).filter((a: any) => a?.name).length,
+            );
+            out.push({
+              id: `remote_puzzle_${f}`,
+              title: data.title || f.replace(/\.json$/i, ""),
+              pairs,
+              scenario: data,
+              addedAt: 0,
+              remote: true,
+            });
+          } catch (e) { console.warn("Failed to load puzzle", f, e); }
+        }
+        setRemotePuzzles(out);
+      } catch (e) { /* no manifest, ignore */ }
+    })();
+  }, []);
 
   // Send scenario to iframe when ready
   useEffect(() => {
@@ -243,7 +309,7 @@ const Media = () => {
 
   const onPuzzleDrop = (e: React.DragEvent) => { e.preventDefault(); handlePuzzleFiles(e.dataTransfer.files); };
 
-  const allPuzzles = useMemo(() => [DEFAULT_PUZZLE, ...puzzles], [puzzles]);
+  const allPuzzles = useMemo(() => [DEFAULT_PUZZLE, ...remotePuzzles, ...puzzles], [remotePuzzles, puzzles]);
 
 
   return (
@@ -290,22 +356,26 @@ const Media = () => {
             >
               {tr("media.importBtn")}
             </button>
-            {lessons.length > 0 && (
+            {displayedLessons.length > 0 && (
               <>
-                <button
-                  onClick={exportJson}
-                  className="text-xs tracking-[0.2em] font-body border border-border px-4 py-2 hover:bg-card transition-colors inline-flex items-center gap-2"
-                >
-                  <Download className="w-3 h-3" /> {tr("media.export")}
-                </button>
-                <button
-                  onClick={clearAll}
-                  className="text-xs tracking-[0.2em] font-body text-muted-foreground underline underline-offset-4 hover:opacity-60"
-                >
-                  {tr("media.clear")}
-                </button>
+                {lessons.length > 0 && (
+                  <>
+                    <button
+                      onClick={exportJson}
+                      className="text-xs tracking-[0.2em] font-body border border-border px-4 py-2 hover:bg-card transition-colors inline-flex items-center gap-2"
+                    >
+                      <Download className="w-3 h-3" /> {tr("media.export")}
+                    </button>
+                    <button
+                      onClick={clearAll}
+                      className="text-xs tracking-[0.2em] font-body text-muted-foreground underline underline-offset-4 hover:opacity-60"
+                    >
+                      {tr("media.clear")}
+                    </button>
+                  </>
+                )}
                 <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground ml-auto uppercase">
-                  {lessons.length} {tr("media.lessons")} · {totalCount} {tr("media.items")}
+                  {displayedLessons.length} {tr("media.lessons")} · {totalCount} {tr("media.items")}
                 </span>
               </>
             )}
@@ -322,7 +392,7 @@ const Media = () => {
           )}
 
           {/* Lessons */}
-          {lessons.length === 0 ? (
+          {displayedLessons.length === 0 ? (
             <div className="border border-border bg-card/30 py-20 text-center">
               <p className="font-serif text-xl italic text-muted-foreground mb-2">
                 {tr("media.empty")}
@@ -333,7 +403,7 @@ const Media = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {lessons.map((lesson) => {
+              {displayedLessons.map((lesson) => {
                 const isOpen = expanded[lesson.id] ?? false;
                 const tab = activeTab[lesson.id] ?? firstTab(lesson);
                 const tabs = ([
@@ -356,6 +426,11 @@ const Media = () => {
                         ◆
                       </div>
                       <div className="flex-1 min-w-0">
+                        {lesson.remote && (
+                          <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground uppercase">
+                            {lang === "el" ? "Ενσωματωμένο" : "Bundled"}
+                          </span>
+                        )}
                         <h3 className="font-serif text-xl md:text-2xl italic font-light mb-1">{lesson.title}</h3>
                         <p className="font-body text-sm text-muted-foreground line-clamp-2">{lesson.description}</p>
                         <div className="flex flex-wrap gap-3 mt-2 text-[10px] tracking-[0.15em] font-body text-muted-foreground uppercase">
@@ -365,13 +440,15 @@ const Media = () => {
                           {lesson.media.text.length > 0 && <span>{lesson.media.text.length} {tr("media.tab.text")}</span>}
                         </div>
                       </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); removeLesson(lesson.id); }}
-                        className="p-2 text-muted-foreground hover:text-destructive transition-colors"
-                        aria-label="Remove"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {!lesson.remote && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); removeLesson(lesson.id); }}
+                          className="p-2 text-muted-foreground hover:text-destructive transition-colors"
+                          aria-label="Remove"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                       <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
                     </div>
 
@@ -546,14 +623,16 @@ const Media = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground uppercase">
-                        {p.builtin ? (lang === "el" ? "Ενσωματωμένο" : "Built-in") : "Custom"}
+                        {p.builtin ? (lang === "el" ? "Ενσωματωμένο" : "Built-in")
+                          : p.remote ? (lang === "el" ? "Ενσωματωμένο" : "Bundled")
+                          : "Custom"}
                       </span>
                       <h3 className="font-serif text-xl md:text-2xl italic font-light mt-1">{displayTitle}</h3>
                       <p className="text-[10px] tracking-[0.15em] font-body uppercase text-muted-foreground mt-1">
                         {p.pairs} {tr("media.puzzles.pairs")}
                       </p>
                     </div>
-                    {!p.builtin && (
+                    {!p.builtin && !p.remote && (
                       <button
                         onClick={() => removePuzzle(p.id)}
                         className="p-2 text-muted-foreground hover:text-destructive transition-colors"
