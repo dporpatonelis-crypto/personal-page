@@ -22,6 +22,7 @@ interface Lesson {
   description: string;
   accent: string;
   media: { audio: AudioItem[]; slides: SlideItem[]; pdf: PdfItem[]; text: TextItem[] };
+  remote?: boolean;
 }
 
 const STORAGE_KEY = "media-library-lessons-v1";
