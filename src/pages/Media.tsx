@@ -205,11 +205,45 @@ const Media = () => {
     } catch {}
     return [];
   });
+  const [remotePuzzles, setRemotePuzzles] = useState<PuzzleScenario[]>([]);
   const [playing, setPlaying] = useState<PuzzleScenario | null>(null);
   const puzzleFileRef = useRef<HTMLInputElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  useEffect(() => { localStorage.setItem(PUZZLES_KEY, JSON.stringify(puzzles)); }, [puzzles]);
+  useEffect(() => { localStorage.setItem(PUZZLES_KEY, JSON.stringify(puzzles.filter(p => !p.remote))); }, [puzzles]);
+
+  // Load permanent puzzles bundled in public/data/puzzles
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/data/puzzles/index.json", { cache: "no-cache" });
+        if (!res.ok) return;
+        const files: string[] = await res.json();
+        const out: PuzzleScenario[] = [];
+        for (const f of files) {
+          try {
+            const r = await fetch(`/data/puzzles/${f}`, { cache: "no-cache" });
+            if (!r.ok) continue;
+            const data = await r.json();
+            if (!data.characters || !data.artifacts) continue;
+            const pairs = Math.min(
+              (data.characters || []).filter((c: any) => c?.name).length,
+              (data.artifacts || []).filter((a: any) => a?.name).length,
+            );
+            out.push({
+              id: `remote_puzzle_${f}`,
+              title: data.title || f.replace(/\.json$/i, ""),
+              pairs,
+              scenario: data,
+              addedAt: 0,
+              remote: true,
+            });
+          } catch (e) { console.warn("Failed to load puzzle", f, e); }
+        }
+        setRemotePuzzles(out);
+      } catch (e) { /* no manifest, ignore */ }
+    })();
+  }, []);
 
   // Send scenario to iframe when ready
   useEffect(() => {
