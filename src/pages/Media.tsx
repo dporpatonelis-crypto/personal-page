@@ -623,14 +623,16 @@ const Media = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground uppercase">
-                        {p.builtin ? (lang === "el" ? "Ενσωματωμένο" : "Built-in") : "Custom"}
+                        {p.builtin ? (lang === "el" ? "Ενσωματωμένο" : "Built-in")
+                          : p.remote ? (lang === "el" ? "Ενσωματωμένο" : "Bundled")
+                          : "Custom"}
                       </span>
                       <h3 className="font-serif text-xl md:text-2xl italic font-light mt-1">{displayTitle}</h3>
                       <p className="text-[10px] tracking-[0.15em] font-body uppercase text-muted-foreground mt-1">
                         {p.pairs} {tr("media.puzzles.pairs")}
                       </p>
                     </div>
-                    {!p.builtin && (
+                    {!p.builtin && !p.remote && (
                       <button
                         onClick={() => removePuzzle(p.id)}
                         className="p-2 text-muted-foreground hover:text-destructive transition-colors"
