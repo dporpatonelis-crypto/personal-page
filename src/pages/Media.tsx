@@ -37,6 +37,7 @@ interface PuzzleScenario {
   scenario: any; // raw JSON for the GLB matcher
   addedAt: number;
   builtin?: boolean;
+  remote?: boolean;
 }
 
 const DEFAULT_PUZZLE: PuzzleScenario = {
