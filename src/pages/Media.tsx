@@ -426,6 +426,11 @@ const Media = () => {
                         ◆
                       </div>
                       <div className="flex-1 min-w-0">
+                        {lesson.remote && (
+                          <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground uppercase">
+                            {lang === "el" ? "Ενσωματωμένο" : "Bundled"}
+                          </span>
+                        )}
                         <h3 className="font-serif text-xl md:text-2xl italic font-light mb-1">{lesson.title}</h3>
                         <p className="font-body text-sm text-muted-foreground line-clamp-2">{lesson.description}</p>
                         <div className="flex flex-wrap gap-3 mt-2 text-[10px] tracking-[0.15em] font-body text-muted-foreground uppercase">
@@ -435,13 +440,15 @@ const Media = () => {
                           {lesson.media.text.length > 0 && <span>{lesson.media.text.length} {tr("media.tab.text")}</span>}
                         </div>
                       </div>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); removeLesson(lesson.id); }}
-                        className="p-2 text-muted-foreground hover:text-destructive transition-colors"
-                        aria-label="Remove"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {!lesson.remote && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); removeLesson(lesson.id); }}
+                          className="p-2 text-muted-foreground hover:text-destructive transition-colors"
+                          aria-label="Remove"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                       <ChevronDown className={`w-5 h-5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
                     </div>
 
