@@ -392,7 +392,7 @@ const Media = () => {
           )}
 
           {/* Lessons */}
-          {lessons.length === 0 ? (
+          {displayedLessons.length === 0 ? (
             <div className="border border-border bg-card/30 py-20 text-center">
               <p className="font-serif text-xl italic text-muted-foreground mb-2">
                 {tr("media.empty")}
@@ -403,7 +403,7 @@ const Media = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {lessons.map((lesson) => {
+              {displayedLessons.map((lesson) => {
                 const isOpen = expanded[lesson.id] ?? false;
                 const tab = activeTab[lesson.id] ?? firstTab(lesson);
                 const tabs = ([
