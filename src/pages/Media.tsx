@@ -309,7 +309,7 @@ const Media = () => {
 
   const onPuzzleDrop = (e: React.DragEvent) => { e.preventDefault(); handlePuzzleFiles(e.dataTransfer.files); };
 
-  const allPuzzles = useMemo(() => [DEFAULT_PUZZLE, ...puzzles], [puzzles]);
+  const allPuzzles = useMemo(() => [DEFAULT_PUZZLE, ...remotePuzzles, ...puzzles], [remotePuzzles, puzzles]);
 
 
   return (
