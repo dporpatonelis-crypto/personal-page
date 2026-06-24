@@ -105,13 +105,42 @@ const Media = () => {
   const [lessons, setLessons] = useState<Lesson[]>(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
   });
+  const [remoteLessons, setRemoteLessons] = useState<Lesson[]>([]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<Record<string, TabKey>>({});
   const [status, setStatus] = useState<{ type: "ok" | "err" | "info"; msg: string } | null>(null);
   const [modal, setModal] = useState<{ title: string; html: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons)); }, [lessons]);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons.filter(l => !l.remote)));
+  }, [lessons]);
+
+  // Load permanent lessons bundled in public/data/lessons
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/data/lessons/index.json", { cache: "no-cache" });
+        if (!res.ok) return;
+        const files: string[] = await res.json();
+        const out: Lesson[] = [];
+        for (const f of files) {
+          try {
+            const r = await fetch(`/data/lessons/${f}`, { cache: "no-cache" });
+            if (!r.ok) continue;
+            const data = await r.json();
+            const conv = convertNotebookToLessons(data);
+            conv.forEach((l, i) => out.push({
+              ...l,
+              id: `remote_lesson_${f}_${i}`,
+              remote: true,
+            }));
+          } catch (e) { console.warn("Failed to load lesson", f, e); }
+        }
+        setRemoteLessons(out);
+      } catch (e) { /* no manifest, ignore */ }
+    })();
+  }, []);
 
   const firstTab = (l: Lesson): TabKey => {
     const order: TabKey[] = ["audio", "slides", "pdf", "text"];
