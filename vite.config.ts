@@ -5,6 +5,9 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // GitHub Pages serves this project below /personal-page/.
+  // Keep local development at the root while emitting deployable asset URLs.
+  base: mode === "production" ? "/personal-page/" : "/",
   server: {
     host: "::",
     port: 8080,

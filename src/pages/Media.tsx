@@ -28,6 +28,7 @@ interface Lesson {
 const STORAGE_KEY = "media-library-lessons-v1";
 const PUZZLES_KEY = "media-library-puzzles-v1";
 const ACCENTS = ["#c9a84c", "#8296b0", "#a3c585", "#c17c74", "#9b72cf", "#e8a87c"];
+const PUBLIC_BASE_URL = import.meta.env.BASE_URL;
 
 // ---------- Puzzle types ----------
 interface PuzzleScenario {
@@ -120,13 +121,13 @@ const Media = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/data/lessons/index.json", { cache: "no-cache" });
+        const res = await fetch(`${PUBLIC_BASE_URL}data/lessons/index.json`, { cache: "no-cache" });
         if (!res.ok) return;
         const files: string[] = await res.json();
         const out: Lesson[] = [];
         for (const f of files) {
           try {
-            const r = await fetch(`/data/lessons/${f}`, { cache: "no-cache" });
+            const r = await fetch(`${PUBLIC_BASE_URL}data/lessons/${f}`, { cache: "no-cache" });
             if (!r.ok) continue;
             const data = await r.json();
             const conv = convertNotebookToLessons(data);
@@ -216,13 +217,13 @@ const Media = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/data/puzzles/index.json", { cache: "no-cache" });
+        const res = await fetch(`${PUBLIC_BASE_URL}data/puzzles/index.json`, { cache: "no-cache" });
         if (!res.ok) return;
         const files: string[] = await res.json();
         const out: PuzzleScenario[] = [];
         for (const f of files) {
           try {
-            const r = await fetch(`/data/puzzles/${f}`, { cache: "no-cache" });
+            const r = await fetch(`${PUBLIC_BASE_URL}data/puzzles/${f}`, { cache: "no-cache" });
             if (!r.ok) continue;
             const data = await r.json();
             if (!data.characters || !data.artifacts) continue;
@@ -680,7 +681,7 @@ const Media = () => {
             </div>
             <iframe
               ref={iframeRef}
-              src="/puzzles/glb-matcher.html"
+              src={`${PUBLIC_BASE_URL}puzzles/glb-matcher.html`}
               className="flex-1 w-full border-0"
               title="Puzzle"
               allow="xr-spatial-tracking; fullscreen"
