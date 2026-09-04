@@ -1,3 +1,4 @@
+# Build and publish the Vite app as a GitHub Pages artifact.
 name: Deploy to GitHub Pages
 
 on:
