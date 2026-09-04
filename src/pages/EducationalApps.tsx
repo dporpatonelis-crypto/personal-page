@@ -8,6 +8,15 @@ import type { ImageKey } from "@/contexts/ImageSettingsContext";
 
 const apps = [
   {
+    title: "Idea Weaver Board",
+    subtitle: "Interactive Idea Board",
+    description: "Interactive educational board for connecting ideas, clues, evidence, and notes. Students can build visual investigations and save or import board libraries.",
+    tags: ["Ideas", "Board", "Education"],
+    imageKey: "gallery1" as ImageKey,
+    url: "https://idea-weaver-board.vercel.app/",
+    github: "#",
+  },
+  {
     title: "Mind Palace",
     subtitle: "Η Υπόθεση του Φιλοσόφου",
     description: "A Greek-language philosophical detective game. Students investigate doctrinal and historical questions through clue-based narrative exploration. Backend: Google Apps Script + Gemini AI.",
@@ -35,12 +44,12 @@ const apps = [
     github: "https://github.com/dporpatonelis-crypto/Map-Timeline",
   },
   {
-    title: "Living Anchor",
-    subtitle: "Text Analysis Hub",
-    description: "Annotation and analysis workspace for patristic and theological texts. Firebase-backed storage, collaborative annotation, and deep-linking to source passages.",
-    tags: ["Annotation", "Firebase"],
+    title: "Light Up Legacy",
+    subtitle: "Interpretive Sculpture · VR Quest",
+    description: "Interactive educational experience in interpretive sculpture. Students explore a VR quest inspired by Basil the Great and the Basiliad, with their words lighting the sculpture.",
+    tags: ["VR", "Interactive", "Sculpture"],
     imageKey: "hero1" as ImageKey,
-    url: "https://idea-weaver-board.vercel.app/",
+    url: "https://dporpatonelis-crypto.github.io/light-up-legacy/public/game.html",
     github: "#",
   },
   {
@@ -51,15 +60,6 @@ const apps = [
     imageKey: "hero2" as ImageKey,
     url: "https://dporpatonelis-crypto.github.io/interactive-books/index.html",
     github: "https://github.com/dporpatonelis-crypto/interactive-books",
-  },
-  {
-    title: "Central Console",
-    subtitle: "Dashboard & Orchestrator",
-    description: "Firebase-connected React Three Fiber dashboard coordinating all six applications. Includes a 3D museum scene and serves as the central hub for lesson orchestration.",
-    tags: ["Firebase", "React"],
-    imageKey: "gallery1" as ImageKey,
-    url: "#",
-    github: "#",
   },
 ];
 
