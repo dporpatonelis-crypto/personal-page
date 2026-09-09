@@ -80,7 +80,14 @@
             "notes": "Βιντεοσκοπημένο υλικό που επέλεξε ρητά ο εκπαιδευτικός για θέαση και συγκριτική σύνθεση."
           }
         ],
-        "slides": [],
+        "slides": [
+          {
+            "id": "pp_slides_freedom_1",
+            "label": "NotebookLM Slides — Δόγμα και Βίωμα",
+            "url": "https://notebooklm.link.google/QDF26lqY1kcV",
+            "notes": "SLD-008 — η επόμενη παρουσίαση NotebookLM για το μάθημα «Δόγμα και Βίωμα»."
+          }
+        ],
         "notebooklm": [],
         "pdf": [],
         "text": []
@@ -88,4 +95,3 @@
     }
   ]
 }
-
