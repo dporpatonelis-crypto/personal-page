@@ -100,7 +100,8 @@ function convertNotebookToLessons(data: any): Lesson[] {
     if (ms && typeof ms === "object") {
       (ms.audio || []).forEach((a: any) => {
         if (!a.url) return;
-        const isNLM = /^https?:\\/\\/(?:www\\.)?notebooklm\\.link\\.google\\//i.test(String(a.url));
+        const normalizedUrl = String(a.url).toLowerCase();
+        const isNLM = normalizedUrl.startsWith("https://notebooklm.link.google/") || normalizedUrl.startsWith("http://notebooklm.link.google/") || normalizedUrl.startsWith("https://www.notebooklm.link.google/");
         const common = { title: a.label || (isNLM ? "NotebookLM" : "Audio"), subtitle: a.notes, description: a.notes };
         media.audio.push(isNLM
           ? { ...common, isNLM: true, nlmUrl: a.url }
