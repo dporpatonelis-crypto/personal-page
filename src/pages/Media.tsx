@@ -98,7 +98,14 @@ function convertNotebookToLessons(data: any): Lesson[] {
 
     const ms = ch.media;
     if (ms && typeof ms === "object") {
-      (ms.audio || []).forEach((a: any) => a.url && media.audio.push({ title: a.label || "Audio", subtitle: a.notes, description: a.notes, audioUrl: a.url }));
+      (ms.audio || []).forEach((a: any) => {
+        if (!a.url) return;
+        const isNLM = /^https?:\\/\\/(?:www\\.)?notebooklm\\.link\\.google\\//i.test(String(a.url));
+        const common = { title: a.label || (isNLM ? "NotebookLM" : "Audio"), subtitle: a.notes, description: a.notes };
+        media.audio.push(isNLM
+          ? { ...common, isNLM: true, nlmUrl: a.url }
+          : { ...common, audioUrl: a.url });
+      });
       (ms.slides || []).forEach((s: any) => s.url && media.slides.push({ title: s.label || "Presentation", subtitle: s.notes, description: s.notes, embedUrl: s.url, directUrl: s.url }));
       (ms.pdf || []).forEach((p: any) => p.url && media.pdf.push({
         title: p.label || "PDF", subtitle: p.notes, description: p.notes, pdfUrl: p.url,
