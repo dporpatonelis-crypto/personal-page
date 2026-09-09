@@ -345,7 +345,11 @@ const Media = () => {
   };
 
   const renderCuratedEntry = (entry: CuratedMedia, bucket: CurationBucket) => {
-    const item = entry.item as any;
+    const sourceLesson = [...remoteLessons, ...lessons].find(lesson => lesson.id === entry.lessonId);
+    const sourceItems = sourceLesson ? (sourceLesson.media[entry.tab] as MediaItem[]) : [];
+    const liveItem = sourceItems[entry.index] || sourceItems.find(candidate => candidate.title === entry.item.title);
+    const item = (liveItem || entry.item) as any;
+    const sourceTitle = sourceLesson?.title || entry.lessonTitle;
     const typeLabel = entry.tab === "audio"
       ? (item.isNLM ? "NotebookLM" : "Audio")
       : entry.tab === "slides" ? "Slides"
@@ -359,7 +363,7 @@ const Media = () => {
             <span className="text-[10px] tracking-[0.15em] font-body text-muted-foreground uppercase">{typeLabel}</span>
             <h3 className="font-serif text-lg italic mt-1">{item.title}</h3>
             <p className="text-[10px] tracking-[0.12em] font-body uppercase text-muted-foreground mt-1">
-              {lang === "el" ? "Από" : "From"}: {entry.lessonTitle}
+              {lang === "el" ? "Από" : "From"}: {sourceTitle}
             </p>
           </div>
           <button
