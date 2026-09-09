@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Upload, Trash2, ChevronDown, FileText, Headphones, Presentation, FileType, ExternalLink, X, Download, Puzzle, Play } from "lucide-react";
+import { Upload, Trash2, ChevronDown, FileText, Headphones, Presentation, FileType, ExternalLink, X, Download, Puzzle, Play, Bookmark, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SettingsPanel from "@/components/SettingsPanel";
@@ -15,6 +15,22 @@ interface AudioItem {
 interface SlideItem { title: string; subtitle?: string; description?: string; date?: string; embedUrl?: string; directUrl?: string; }
 interface PdfItem { title: string; subtitle?: string; description?: string; date?: string; pdfUrl?: string; viewerUrl?: string; }
 interface TextItem { title: string; subtitle?: string; description?: string; date?: string; type?: string; content: string; }
+type MediaItem = AudioItem | SlideItem | PdfItem | TextItem;
+type CurationBucket = "current" | "selected";
+
+interface CuratedMedia {
+  id: string;
+  lessonId: string;
+  lessonTitle: string;
+  tab: TabKey;
+  index: number;
+  item: MediaItem;
+}
+
+interface MediaCurations {
+  current: CuratedMedia[];
+  selected: CuratedMedia[];
+}
 
 interface Lesson {
   id: string;
@@ -26,6 +42,7 @@ interface Lesson {
 }
 
 const STORAGE_KEY = "media-library-lessons-v1";
+const CURATIONS_KEY = "media-library-curations-v1";
 const PUZZLES_KEY = "media-library-puzzles-v1";
 const ACCENTS = ["#c9a84c", "#8296b0", "#a3c585", "#c17c74", "#9b72cf", "#e8a87c"];
 const PUBLIC_BASE_URL = import.meta.env.BASE_URL;
@@ -100,6 +117,42 @@ function convertNotebookToLessons(data: any): Lesson[] {
   });
 }
 
+function emptyCurations(): MediaCurations {
+  return { current: [], selected: [] };
+}
+
+function normalizeCurations(value: any): MediaCurations {
+  const validTabs: TabKey[] = ["audio", "slides", "pdf", "text"];
+  const normalizeBucket = (bucket: any): CuratedMedia[] => {
+    if (!Array.isArray(bucket)) return [];
+    return bucket
+      .filter((entry: any) => entry && typeof entry.id === "string" && entry.item && typeof entry.item.title === "string")
+      .map((entry: any): CuratedMedia => ({
+        id: String(entry.id),
+        lessonId: String(entry.lessonId || ""),
+        lessonTitle: String(entry.lessonTitle || "Lesson"),
+        tab: validTabs.includes(entry.tab) ? entry.tab : "text",
+        index: typeof entry.index === "number" ? entry.index : 0,
+        item: entry.item as MediaItem,
+      }));
+  };
+  return {
+    current: normalizeBucket(value?.current),
+    selected: normalizeBucket(value?.selected),
+  };
+}
+
+function createCuratedMedia(lesson: Lesson, tab: TabKey, index: number, item: MediaItem): CuratedMedia {
+  return {
+    id: lesson.id + "::" + tab + "::" + index,
+    lessonId: lesson.id,
+    lessonTitle: lesson.title,
+    tab,
+    index,
+    item,
+  };
+}
+
 // ---------- Page ----------
 const Media = () => {
   const { tr, lang } = useLanguage();
@@ -112,10 +165,22 @@ const Media = () => {
   const [status, setStatus] = useState<{ type: "ok" | "err" | "info"; msg: string } | null>(null);
   const [modal, setModal] = useState<{ title: string; html: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const curationFileRef = useRef<HTMLInputElement>(null);
+  const [curations, setCurations] = useState<MediaCurations>(() => {
+    try {
+      return normalizeCurations(JSON.parse(localStorage.getItem(CURATIONS_KEY) || "{}"));
+    } catch {
+      return emptyCurations();
+    }
+  });
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons.filter(l => !l.remote)));
   }, [lessons]);
+
+  useEffect(() => {
+    localStorage.setItem(CURATIONS_KEY, JSON.stringify(curations));
+  }, [curations]);
 
   // Load permanent lessons bundled in public/data/lessons
   useEffect(() => {
@@ -188,6 +253,207 @@ const Media = () => {
     a.href = url; a.download = "media-library.json"; a.click();
     URL.revokeObjectURL(url);
   }
+
+  function toggleCuration(bucket: CurationBucket, lesson: Lesson, tab: TabKey, index: number, item: MediaItem) {
+    const entry = createCuratedMedia(lesson, tab, index, item);
+    setCurations(prev => {
+      const list = prev[bucket];
+      const exists = list.some(existing => existing.id === entry.id);
+      return {
+        ...prev,
+        [bucket]: exists ? list.filter(existing => existing.id !== entry.id) : [...list, entry],
+      };
+    });
+  }
+
+  function removeCuration(bucket: CurationBucket, id: string) {
+    setCurations(prev => ({
+      ...prev,
+      [bucket]: prev[bucket].filter(entry => entry.id !== id),
+    }));
+  }
+
+  function clearCuration(bucket: CurationBucket) {
+    if (!curations[bucket].length) return;
+    const label = bucket === "current"
+      ? (lang === "el" ? "του τρέχοντος μαθήματος" : "the current lesson")
+      : (lang === "el" ? "των επιλεγμένων" : "the selected items");
+    if (!confirm(lang === "el" ? "Να διαγραφούν οι επιλογές " + label + ";" : "Clear " + label + "?")) return;
+    setCurations(prev => ({ ...prev, [bucket]: [] }));
+  }
+
+  function exportCurations() {
+    const blob = new Blob([
+      JSON.stringify({ version: 1, current: curations.current, selected: curations.selected }, null, 2),
+    ], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "media-curation.json"; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleCurationFile(files: FileList | null) {
+    if (!files?.length) return;
+    try {
+      const text = await files[0].text();
+      const parsed = JSON.parse(text);
+      const next = normalizeCurations(parsed);
+      setCurations(next);
+      setStatus({
+        type: "ok",
+        msg: lang === "el"
+          ? "Οι επιλογές current lesson και Επιλεγμένα φορτώθηκαν."
+          : "Current lesson and Selected items loaded.",
+      });
+    } catch (e: any) {
+      setStatus({ type: "err", msg: (lang === "el" ? "Σφάλμα επιλογών: " : "Curation error: ") + e.message });
+    }
+    setTimeout(() => setStatus(null), 4000);
+    if (curationFileRef.current) curationFileRef.current.value = "";
+  }
+
+  const renderCurationActions = (lesson: Lesson, tab: TabKey, index: number, item: MediaItem) => {
+    const entry = createCuratedMedia(lesson, tab, index, item);
+    const inCurrent = curations.current.some(existing => existing.id === entry.id);
+    const inSelected = curations.selected.some(existing => existing.id === entry.id);
+    return (
+      <div className="flex flex-wrap gap-2 mb-3">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); toggleCuration("current", lesson, tab, index, item); }}
+          aria-pressed={inCurrent}
+          className={inCurrent
+            ? "inline-flex items-center gap-1 text-[10px] tracking-[0.12em] font-body uppercase border border-foreground bg-foreground text-background px-2 py-1"
+            : "inline-flex items-center gap-1 text-[10px] tracking-[0.12em] font-body uppercase border border-border text-muted-foreground px-2 py-1 hover:border-foreground hover:text-foreground"}
+        >
+          <Bookmark className={inCurrent ? "w-3 h-3 fill-current" : "w-3 h-3"} />
+          {inCurrent ? (lang === "el" ? "Στο τρέχον" : "In current") : (lang === "el" ? "Τρέχον μάθημα" : "Current lesson")}
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); toggleCuration("selected", lesson, tab, index, item); }}
+          aria-pressed={inSelected}
+          className={inSelected
+            ? "inline-flex items-center gap-1 text-[10px] tracking-[0.12em] font-body uppercase border border-foreground bg-foreground text-background px-2 py-1"
+            : "inline-flex items-center gap-1 text-[10px] tracking-[0.12em] font-body uppercase border border-border text-muted-foreground px-2 py-1 hover:border-foreground hover:text-foreground"}
+        >
+          <Star className={inSelected ? "w-3 h-3 fill-current" : "w-3 h-3"} />
+          {inSelected ? (lang === "el" ? "Επιλεγμένο" : "Selected") : (lang === "el" ? "Επιλεγμένα" : "Selected")}
+        </button>
+      </div>
+    );
+  };
+
+  const renderCuratedEntry = (entry: CuratedMedia, bucket: CurationBucket) => {
+    const item = entry.item as any;
+    const typeLabel = entry.tab === "audio"
+      ? (item.isNLM ? "NotebookLM" : "Audio")
+      : entry.tab === "slides" ? "Slides"
+      : entry.tab === "pdf" ? "PDF"
+      : (item.type || "Text");
+
+    return (
+      <article key={bucket + "-" + entry.id} className="border border-border bg-background p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <span className="text-[10px] tracking-[0.15em] font-body text-muted-foreground uppercase">{typeLabel}</span>
+            <h3 className="font-serif text-lg italic mt-1">{item.title}</h3>
+            <p className="text-[10px] tracking-[0.12em] font-body uppercase text-muted-foreground mt-1">
+              {lang === "el" ? "Από" : "From"}: {entry.lessonTitle}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => removeCuration(bucket, entry.id)}
+            className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+            aria-label={lang === "el" ? "Αφαίρεση επιλογής" : "Remove selection"}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        {item.description && <p className="font-body text-sm text-muted-foreground mt-3">{item.description}</p>}
+        {entry.tab === "audio" && item.audioUrl && <audio controls className="w-full mt-3" src={item.audioUrl} />}
+        {entry.tab === "audio" && item.isNLM && item.nlmUrl && (
+          <a href={item.nlmUrl} target="_blank" rel="noreferrer"
+            className="inline-flex items-center gap-2 mt-3 text-xs tracking-[0.15em] font-body border border-foreground px-3 py-2 hover:bg-foreground hover:text-background transition-colors">
+            {tr("media.open")} <ExternalLink className="w-3 h-3" />
+          </a>
+        )}
+        {entry.tab === "slides" && (item.directUrl || item.embedUrl) && (
+          <a href={item.directUrl || item.embedUrl} target="_blank" rel="noreferrer"
+            className="inline-flex items-center gap-2 mt-3 text-xs tracking-[0.15em] font-body border border-foreground px-3 py-2 hover:bg-foreground hover:text-background transition-colors">
+            {tr("media.open")} <ExternalLink className="w-3 h-3" />
+          </a>
+        )}
+        {entry.tab === "pdf" && (item.pdfUrl || item.viewerUrl) && (
+          <div className="flex flex-wrap gap-3 mt-3">
+            <a href={item.pdfUrl || item.viewerUrl} target="_blank" rel="noreferrer"
+              className="text-xs tracking-[0.15em] font-body border border-foreground px-3 py-2 hover:bg-foreground hover:text-background transition-colors">
+              {tr("media.open")}
+            </a>
+            {item.pdfUrl && <a href={item.pdfUrl} download
+              className="text-xs tracking-[0.15em] font-body border border-border px-3 py-2 hover:bg-card transition-colors">
+              {tr("media.download")}
+            </a>}
+          </div>
+        )}
+        {entry.tab === "text" && (
+          <button
+            type="button"
+            onClick={() => setModal({ title: item.title, html: item.content || "" })}
+            className="inline-flex mt-3 text-xs tracking-[0.15em] font-body border border-foreground px-3 py-2 hover:bg-foreground hover:text-background transition-colors"
+          >
+            {tr("media.read")}
+          </button>
+        )}
+      </article>
+    );
+  };
+
+  const renderCurationBucket = (bucket: CurationBucket) => {
+    const isCurrent = bucket === "current";
+    const entries = curations[bucket];
+    const Icon = isCurrent ? Bookmark : Star;
+    const title = isCurrent
+      ? (lang === "el" ? "Τρέχον μάθημα" : "Current lesson")
+      : (lang === "el" ? "Επιλεγμένα" : "Selected");
+    const empty = isCurrent
+      ? (lang === "el" ? "Διάλεξε υλικό από οποιοδήποτε μάθημα παρακάτω." : "Choose material from any lesson below.")
+      : (lang === "el" ? "Κράτησε εδώ το υλικό που θέλεις να επαναχρησιμοποιείς." : "Keep reusable, important material here.");
+
+    return (
+      <div className="border border-border bg-card/40 p-5">
+        <div className="flex items-start gap-3 mb-4">
+          <Icon className="w-4 h-4 mt-1 opacity-70" />
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <h2 className="font-serif text-2xl italic font-light">{title}</h2>
+              <span className="text-[10px] tracking-[0.15em] font-body text-muted-foreground uppercase">({entries.length})</span>
+            </div>
+            <p className="text-xs font-body text-muted-foreground mt-1">{empty}</p>
+          </div>
+          {entries.length > 0 && (
+            <button
+              type="button"
+              onClick={() => clearCuration(bucket)}
+              className="text-[10px] tracking-[0.15em] font-body text-muted-foreground underline underline-offset-4 hover:text-destructive"
+            >
+              {lang === "el" ? "Καθαρισμός" : "Clear"}
+            </button>
+          )}
+        </div>
+        {entries.length > 0 ? (
+          <div className="grid grid-cols-1 gap-3">
+            {entries.map(entry => renderCuratedEntry(entry, bucket))}
+          </div>
+        ) : (
+          <p className="border border-dashed border-border p-5 text-center text-[10px] tracking-[0.12em] font-body text-muted-foreground uppercase">
+            {lang === "el" ? "Δεν έχει προστεθεί υλικό ακόμη." : "No material added yet."}
+          </p>
+        )}
+      </div>
+    );
+  };
 
   const onDrop = (e: React.DragEvent) => { e.preventDefault(); handleFiles(e.dataTransfer.files); };
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
@@ -357,6 +623,25 @@ const Media = () => {
             >
               {tr("media.importBtn")}
             </button>
+            <button
+              onClick={() => curationFileRef.current?.click()}
+              className="inline-flex items-center gap-2 text-xs tracking-[0.2em] font-body border border-border px-4 py-2 hover:bg-card transition-colors"
+            >
+              <Upload className="w-3 h-3" /> {lang === "el" ? "Εισαγωγή επιλογών" : "Import choices"}
+            </button>
+            <button
+              onClick={exportCurations}
+              className="inline-flex items-center gap-2 text-xs tracking-[0.2em] font-body border border-border px-4 py-2 hover:bg-card transition-colors"
+            >
+              <Download className="w-3 h-3" /> {lang === "el" ? "Εξαγωγή επιλογών" : "Export choices"}
+            </button>
+            <input
+              ref={curationFileRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={(e) => handleCurationFile(e.target.files)}
+            />
             {displayedLessons.length > 0 && (
               <>
                 {lessons.length > 0 && (
@@ -391,6 +676,12 @@ const Media = () => {
               {status.msg}
             </div>
           )}
+
+          {/* Independent curation, kept outside repository-fed lesson data */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+            {renderCurationBucket("current")}
+            {renderCurationBucket("selected")}
+          </section>
 
           {/* Lessons */}
           {displayedLessons.length === 0 ? (
@@ -481,6 +772,7 @@ const Media = () => {
                                 {it.isNLM ? "NotebookLM AI" : "Audio"}
                               </span>
                               <h4 className="font-serif text-lg italic mt-1 mb-2">{it.title}</h4>
+                              {renderCurationActions(lesson, "audio", i, it)}
                               {it.subtitle && <p className="text-[10px] tracking-[0.15em] font-body uppercase text-muted-foreground mb-2">{it.subtitle}</p>}
                               {it.description && <p className="font-body text-sm text-muted-foreground mb-3">{it.description}</p>}
                               {it.audioUrl && <audio controls className="w-full" src={it.audioUrl} />}
@@ -496,6 +788,7 @@ const Media = () => {
                             <article key={i} className="border border-border bg-background p-5">
                               <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground uppercase">Slides</span>
                               <h4 className="font-serif text-lg italic mt-1 mb-2">{it.title}</h4>
+                              {renderCurationActions(lesson, "slides", i, it)}
                               {it.description && <p className="font-body text-sm text-muted-foreground mb-3">{it.description}</p>}
                               {it.embedUrl && (
                                 <div className="aspect-video mb-3">
@@ -514,6 +807,7 @@ const Media = () => {
                             <article key={i} className="border border-border bg-background p-5">
                               <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground uppercase">PDF</span>
                               <h4 className="font-serif text-lg italic mt-1 mb-2">{it.title}</h4>
+                              {renderCurationActions(lesson, "pdf", i, it)}
                               {it.description && <p className="font-body text-sm text-muted-foreground mb-3">{it.description}</p>}
                               {it.viewerUrl && (
                                 <div className="aspect-[4/3] mb-3">
@@ -538,6 +832,7 @@ const Media = () => {
                             <article key={i} className="border border-border bg-background p-5 flex flex-col">
                               <span className="text-[10px] tracking-[0.2em] font-body text-muted-foreground uppercase">{it.type || "Text"}</span>
                               <h4 className="font-serif text-lg italic mt-1 mb-2">{it.title}</h4>
+                              {renderCurationActions(lesson, "text", i, it)}
                               {it.description && <p className="font-body text-sm text-muted-foreground mb-3">{it.description}</p>}
                               <button
                                 onClick={() => setModal({ title: it.title, html: it.content })}
