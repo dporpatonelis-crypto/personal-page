@@ -123,6 +123,30 @@ export const t: Translations = {
   },
   "apps.launch": { en: "LAUNCH APP", el: "ΕΚΚΙΝΗΣΗ" },
   "apps.demo": { en: "Demo Video", el: "Βίντεο Επίδειξης" },
+  "apps.classroom.label": { en: "CLASSROOM LINKS", el: "ΣΥΝΔΕΣΜΟΙ ΓΙΑ ΤΗΝ ΤΑΞΗ" },
+  "apps.classroom.title": { en: "Ready for the classroom", el: "Έτοιμα για την τάξη" },
+  "apps.classroom.desc": {
+    en: "A small collection of links saved for quick use during a lesson.",
+    el: "Μια μικρή συλλογή συνδέσμων για γρήγορη χρήση κατά τη διάρκεια του μαθήματος.",
+  },
+  "apps.classroom.resource": { en: "RESOURCE", el: "ΥΛΙΚΟ" },
+  "apps.classroom.action": { en: "OPEN", el: "ΑΝΟΙΓΜΑ" },
+  "apps.classroom.open": { en: "OPEN LINK", el: "ΑΝΟΙΓΜΑ ΣΥΝΔΕΣΜΟΥ" },
+  "apps.classroom.video": { en: "Classroom video", el: "Βίντεο για την τάξη" },
+  "apps.classroom.videoDesc": {
+    en: "A ready-to-open video resource for lesson introduction or recap.",
+    el: "Ένα έτοιμο βίντεο για την εισαγωγή ή την ανακεφαλαίωση του μαθήματος.",
+  },
+  "apps.classroom.frameworks": { en: "Explore frameworks", el: "Εξερεύνηση πλαισίων" },
+  "apps.classroom.frameworksDesc": {
+    en: "The personal page with the wider collection of educational frameworks and tools.",
+    el: "Η personal page με τη συνολική συλλογή εκπαιδευτικών πλαισίων και εργαλείων.",
+  },
+  "apps.classroom.board": { en: "Investigation Board template", el: "Πρότυπο Investigation Board" },
+  "apps.classroom.boardDesc": {
+    en: "A Google Slides template for organizing clues and investigation prompts.",
+    el: "Πρότυπο Google Slides για την οργάνωση clues και ερωτημάτων διερεύνησης.",
+  },
 
   // Student Portal
   "portal.label": { en: "STUDENT PORTAL", el: "ΦΟΙΤΗΤΙΚΗ ΠΥΛΗ" },
