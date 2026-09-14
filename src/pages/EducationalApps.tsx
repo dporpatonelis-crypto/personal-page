@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SettingsPanel from "@/components/SettingsPanel";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ExternalLink, Link2, Play, Presentation } from "lucide-react";
 import { useImageSettings } from "@/contexts/ImageSettingsContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { ImageKey } from "@/contexts/ImageSettingsContext";
@@ -60,6 +60,31 @@ const apps = [
     imageKey: "hero2" as ImageKey,
     url: "https://dporpatonelis-crypto.github.io/interactive-books/index.html",
     github: "https://github.com/dporpatonelis-crypto/interactive-books",
+  },
+];
+
+
+const classroomLinks = [
+  {
+    titleKey: "apps.classroom.video",
+    descriptionKey: "apps.classroom.videoDesc",
+    domain: "youtu.be",
+    url: "https://youtu.be/-2kH2aSh61M?is=leCV-Zw9ZMXEdVlV",
+    icon: Play,
+  },
+  {
+    titleKey: "apps.classroom.frameworks",
+    descriptionKey: "apps.classroom.frameworksDesc",
+    domain: "dporpatonelis-crypto.github.io/personal-page",
+    url: "https://dporpatonelis-crypto.github.io/personal-page/",
+    icon: Link2,
+  },
+  {
+    titleKey: "apps.classroom.board",
+    descriptionKey: "apps.classroom.boardDesc",
+    domain: "docs.google.com/presentation",
+    url: "https://docs.google.com/presentation/d/1JOuvpoACUR5JpgLpPFAv5dHMsY4kJTVqhpXPqlH-nfw/mobilepresent?slide=id.tpl_investigation_v1",
+    icon: Presentation,
   },
 ];
 
@@ -122,6 +147,70 @@ const EducationalApps = () => {
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="mt-20 border-t border-border pt-12">
+            <div className="max-w-3xl">
+              <span className="text-xs tracking-[0.2em] font-body text-muted-foreground mb-4 block">
+                {tr("apps.classroom.label")}
+              </span>
+              <h2 className="font-serif text-3xl md:text-4xl italic font-light mb-4">
+                {tr("apps.classroom.title")}
+              </h2>
+              <p className="font-body text-sm font-light text-muted-foreground leading-relaxed">
+                {tr("apps.classroom.desc")}
+              </p>
+            </div>
+
+            <div className="mt-8 overflow-hidden border border-border bg-card/40">
+              <div className="hidden md:grid grid-cols-[minmax(0,1fr)_auto] gap-6 border-b border-border bg-muted/30 px-6 py-3">
+                <span className="text-[0.65rem] tracking-[0.18em] font-body text-muted-foreground">
+                  {tr("apps.classroom.resource")}
+                </span>
+                <span className="text-[0.65rem] tracking-[0.18em] font-body text-muted-foreground">
+                  {tr("apps.classroom.action")}
+                </span>
+              </div>
+
+              <div className="divide-y divide-border">
+                {classroomLinks.map((link) => {
+                  const Icon = link.icon;
+
+                  return (
+                    <div
+                      key={link.url}
+                      className="group grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] items-center gap-5 px-5 py-5 md:px-6 hover:bg-accent/30 transition-colors"
+                    >
+                      <div className="flex min-w-0 items-start gap-4">
+                        <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center border border-border bg-background text-muted-foreground transition-colors group-hover:border-foreground/40 group-hover:text-foreground">
+                          <Icon className="w-4 h-4" strokeWidth={1.5} />
+                        </span>
+                        <div className="min-w-0">
+                          <h3 className="font-serif text-xl italic font-light mb-1">
+                            {tr(link.titleKey)}
+                          </h3>
+                          <p className="font-body text-sm font-light text-muted-foreground leading-relaxed">
+                            {tr(link.descriptionKey)}
+                          </p>
+                          <span className="mt-2 block truncate text-[0.65rem] tracking-[0.1em] text-muted-foreground/80">
+                            {link.domain}
+                          </span>
+                        </div>
+                      </div>
+
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-fit items-center gap-2 text-xs font-body tracking-[0.18em] underline-offset-4 hover:underline md:justify-self-end"
+                      >
+                        {tr("apps.classroom.open")} <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           <div className="mt-20 border-t border-border pt-8">
