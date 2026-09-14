@@ -73,13 +73,6 @@ const classroomLinks = [
     icon: Play,
   },
   {
-    titleKey: "apps.classroom.frameworks",
-    descriptionKey: "apps.classroom.frameworksDesc",
-    domain: "dporpatonelis-crypto.github.io/personal-page",
-    url: "https://dporpatonelis-crypto.github.io/personal-page/",
-    icon: Link2,
-  },
-  {
     titleKey: "apps.classroom.board",
     descriptionKey: "apps.classroom.boardDesc",
     domain: "docs.google.com/presentation",
@@ -218,7 +211,7 @@ const EducationalApps = () => {
             <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
               <iframe
                 className="absolute inset-0 w-full h-full"
-                src="https://www.youtube.com/embed/Ftr5AbtSxWE?si=KR_zivqiwIqMX6Ij"
+                src="https://www.youtube.com/embed/-2kH2aSh61M"
                 title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
