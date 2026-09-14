@@ -137,11 +137,6 @@ export const t: Translations = {
     en: "A ready-to-open video resource for lesson introduction or recap.",
     el: "Ένα έτοιμο βίντεο για την εισαγωγή ή την ανακεφαλαίωση του μαθήματος.",
   },
-  "apps.classroom.frameworks": { en: "Explore frameworks", el: "Εξερεύνηση πλαισίων" },
-  "apps.classroom.frameworksDesc": {
-    en: "The personal page with the wider collection of educational frameworks and tools.",
-    el: "Η personal page με τη συνολική συλλογή εκπαιδευτικών πλαισίων και εργαλείων.",
-  },
   "apps.classroom.board": { en: "Investigation Board template", el: "Πρότυπο Investigation Board" },
   "apps.classroom.boardDesc": {
     en: "A Google Slides template for organizing clues and investigation prompts.",
