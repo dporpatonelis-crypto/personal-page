@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SettingsPanel from "@/components/SettingsPanel";
-import { ArrowRight, ExternalLink, Link2, Play, Presentation } from "lucide-react";
+import { ArrowRight, ExternalLink, Play, Presentation } from "lucide-react";
 import { useImageSettings } from "@/contexts/ImageSettingsContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { ImageKey } from "@/contexts/ImageSettingsContext";
