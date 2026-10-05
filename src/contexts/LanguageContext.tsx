@@ -137,6 +137,15 @@ export const t: Translations = {
     en: "A ready-to-open video resource for lesson introduction or recap.",
     el: "Ένα έτοιμο βίντεο για την εισαγωγή ή την ανακεφαλαίωση του μαθήματος.",
   },
+  "apps.classroom.paulVideo": {
+    en: "Jerusalem – Athens – Byzantium · UnityVR",
+    el: "Ιεροσόλυμα – Αθήνα – Βυζάντιο · UnityVR",
+  },
+  "apps.classroom.paulVideoDesc": {
+    en: "NotebookLM video for the UnityVR educational scenario, based on the saying of the Apostle Paul.",
+    el: "Βίντεο NotebookLM για το εκπαιδευτικό σενάριο στο UnityVR, με βάση το ρητό του Αποστόλου Παύλου.",
+  },
+  "apps.demo.open": { en: "OPEN DEMO VIDEO", el: "ΑΝΟΙΓΜΑ ΒΙΝΤΕΟ" },
   "apps.classroom.board": { en: "Investigation Board template", el: "Πρότυπο Investigation Board" },
   "apps.classroom.boardDesc": {
     en: "A Google Slides template for organizing clues and investigation prompts.",
