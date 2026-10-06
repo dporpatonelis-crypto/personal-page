@@ -75,6 +75,13 @@ const paulUnityVrVideo = {
 const classroomLinks = [
   paulUnityVrVideo,
   {
+    titleKey: "apps.classroom.notebookVideo",
+    descriptionKey: "apps.classroom.notebookVideoDesc",
+    domain: "notebooklm.link.google",
+    url: "https://notebooklm.link.google/6UY1R8WYqwBz",
+    icon: Play,
+  },
+  {
     titleKey: "apps.classroom.video",
     descriptionKey: "apps.classroom.videoDesc",
     domain: "youtu.be",
