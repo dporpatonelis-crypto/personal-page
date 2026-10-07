@@ -145,6 +145,14 @@ export const t: Translations = {
     en: "A NotebookLM video link saved for quick classroom use.",
     el: "Σύνδεσμος βίντεο NotebookLM για γρήγορη χρήση στην τάξη.",
   },
+  "apps.classroom.notebookDemoVideo": {
+    en: "NotebookLM — Classroom Demo",
+    el: "NotebookLM — Βίντεο επίδειξης",
+  },
+  "apps.classroom.notebookDemoVideoDesc": {
+    en: "NotebookLM video selected as the classroom demo.",
+    el: "Βίντεο NotebookLM που επιλέχθηκε ως demo για την τάξη.",
+  },
   "apps.classroom.paulVideo": {
     en: "Jerusalem – Athens – Byzantium · UnityVR",
     el: "Ιεροσόλυμα – Αθήνα – Βυζάντιο · UnityVR",
