@@ -72,8 +72,17 @@ const paulUnityVrVideo = {
   icon: Play,
 };
 
+const notebookDemoVideo = {
+  titleKey: "apps.classroom.notebookDemoVideo",
+  descriptionKey: "apps.classroom.notebookDemoVideoDesc",
+  domain: "notebooklm.link.google",
+  url: "https://notebooklm.link.google/4SAUMKtEkPJ1",
+  icon: Play,
+};
+
 const classroomLinks = [
   paulUnityVrVideo,
+  notebookDemoVideo,
   {
     titleKey: "apps.classroom.notebookVideo",
     descriptionKey: "apps.classroom.notebookVideoDesc",
@@ -226,17 +235,17 @@ const EducationalApps = () => {
             <h2 className="font-serif text-2xl italic font-light mb-6">{tr("apps.demo")}</h2>
             <div className="relative w-full aspect-video overflow-hidden border border-border bg-card/40">
               <a
-                href={paulUnityVrVideo.url}
+                href={notebookDemoVideo.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={tr(paulUnityVrVideo.titleKey)}
+                aria-label={tr(notebookDemoVideo.titleKey)}
                 className="group absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center transition-colors hover:bg-accent/30"
               >
                 <span className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-background text-foreground transition-transform group-hover:scale-105">
                   <Play className="w-5 h-5" />
                 </span>
                 <span className="font-serif text-xl md:text-2xl italic font-light">
-                  {tr(paulUnityVrVideo.titleKey)}
+                  {tr(notebookDemoVideo.titleKey)}
                 </span>
                 <span className="inline-flex items-center gap-2 text-xs font-body tracking-[0.18em] underline-offset-4 group-hover:underline">
                   {tr("apps.demo.open")} <ExternalLink className="w-3.5 h-3.5" />
