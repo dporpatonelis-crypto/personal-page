@@ -153,6 +153,14 @@ export const t: Translations = {
     en: "NotebookLM video selected as the classroom demo.",
     el: "Βίντεο NotebookLM που επιλέχθηκε ως demo για την τάξη.",
   },
+  "apps.classroom.youtubeDemoVideo": {
+    en: "YouTube — Classroom Demo",
+    el: "YouTube — Βίντεο επίδειξης",
+  },
+  "apps.classroom.youtubeDemoVideoDesc": {
+    en: "YouTube video selected as the Educational Apps demo.",
+    el: "Βίντεο YouTube που επιλέχθηκε ως demo στα Educational Apps.",
+  },
   "apps.classroom.paulVideo": {
     en: "Jerusalem – Athens – Byzantium · UnityVR",
     el: "Ιεροσόλυμα – Αθήνα – Βυζάντιο · UnityVR",
